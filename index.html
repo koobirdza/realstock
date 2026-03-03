@@ -250,30 +250,47 @@ class="mt-4 bg-green-600 text-white px-6 py-3 rounded-xl w-full">
 
 async function saveStock(){
 
+try{
+
 let records=[];
 let today=new Date().toISOString();
 
 stockItems[currentCategory].forEach((item,i)=>{
-records.push({
-date:today,
-employee:employee,
-category:getCategoryName(),
-item:item,
-qty:document.getElementById(`qty-${i}`).value || "0",
-note:document.getElementById(`note-${i}`).value || ""
-});
-});
-
-await fetch(GOOGLE_SCRIPT_URL,{
-method:"POST",
-body:JSON.stringify(records),
-headers:{"Content-Type":"application/json"}
+  records.push({
+    date:today,
+    employee:employee,
+    category:getCategoryName(),
+    item:item,
+    qty:document.getElementById(`qty-${i}`).value || "0",
+    note:document.getElementById(`note-${i}`).value || ""
+  });
 });
 
-alert("✅ บันทึกสำเร็จ");
-goHome();
+const res = await fetch(GOOGLE_SCRIPT_URL,{
+  method:"POST",
+  body:JSON.stringify(records),
+  headers:{"Content-Type":"application/json"}
+});
+
+if(!res.ok){
+  throw new Error("Server error");
 }
 
+const result = await res.json();
+
+if(result.status === "success"){
+  alert("✅ บันทึกสำเร็จ");
+  goHome();
+}else{
+  alert("❌ บันทึกไม่สำเร็จ");
+}
+
+}catch(err){
+  console.error(err);
+  alert("❌ ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้");
+}
+
+}
 /* ================= DASHBOARD ================= */
 
 function openDashboard(){
@@ -345,3 +362,4 @@ scales:{y:{beginAtZero:true}}
 </body>
 
 </html>
+
