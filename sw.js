@@ -1,4 +1,4 @@
-const VERSION = "v17";
+const VERSION = "v19";
 const CACHE_NAME = `realstock-${VERSION}`;
 
 self.addEventListener("install", () => {
