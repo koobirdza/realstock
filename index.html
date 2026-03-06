@@ -32,7 +32,7 @@
 
   <div class="flex items-center justify-between mb-4">
     <h1 class="text-2xl font-bold">🍲 ระบบเช็คสต๊อค • เจริญไทยสุกี้</h1>
-    <div class="text-xs text-gray-500">v16 (Stock Nested + Mobile UI)</div>
+    <div class="text-xs text-gray-500">v17 (Stock Count UI for Storage)</div>
   </div>
 
   <div id="login-page">
@@ -184,7 +184,7 @@
 </div>
 
 <script>
-const VERSION = "v16";
+const VERSION = "v17";
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwSOEIId8C7BVTxCYwiJoSG7N7k4OSy1TfZXJyDHSD2AWSJ7NWGboHYIqMtqbqP2ISn4Q/exec";
 const stockData = {
   "front": {
@@ -1569,6 +1569,7 @@ function renderItems(){
   const list = document.getElementById("item-list");
   const thresholdField = getThresholdField();
   const thresholdLabel = getThresholdLabel();
+  const isStorageCountMode = currentCategory === "stock" && currentAction === "count";
   if(!list) return;
 
   list.innerHTML = items.length ? items.map((it, i) => {
@@ -1578,21 +1579,34 @@ function renderItems(){
     return `
       <div class="bg-white p-4 rounded-3xl shadow mb-3 fade-in">
         <div class="text-2xl font-extrabold leading-snug break-words">${escapeHtml(lineName)}</div>
-        <div class="mt-3 flex items-center gap-3">
-          <div class="w-24 shrink-0 text-sm text-gray-700 leading-snug">
+        <div class="mt-3 flex items-center gap-3 ${isStorageCountMode ? 'justify-between' : ''}">
+          <div class="${isStorageCountMode ? 'text-sm text-gray-700 leading-snug min-w-[72px]' : 'w-24 shrink-0 text-sm text-gray-700 leading-snug'}">
             <div>หน่วย: <b>${escapeHtml(it.unit)}</b></div>
             <div class="mt-1">${escapeHtml(thresholdLabel)}: <b>${escapeHtml(it[thresholdField])}</b></div>
           </div>
-          <div class="flex items-center gap-2 flex-1 justify-end">
-            <button type="button" class="w-11 h-11 rounded-2xl border bg-white text-lg font-semibold active:scale-95 shadow-sm"
-              onclick="changeQty('${id}', '${escapeHtml(it[thresholdField])}', -1)">➖</button>
-            <input type="number" inputmode="numeric" id="qty-${id}"
-              class="border rounded-2xl px-2 py-3 text-center w-24 sm:w-28 text-lg font-semibold"
-              value="${val}" min="0"
-              oninput="onQtyInput('${id}', '${escapeHtml(it[thresholdField])}')">
-            <button type="button" class="w-11 h-11 rounded-2xl border bg-white text-lg font-semibold active:scale-95 shadow-sm"
-              onclick="changeQty('${id}', '${escapeHtml(it[thresholdField])}', 1)">➕</button>
-          </div>
+          ${isStorageCountMode ? `
+            <div class="text-sm text-gray-700 leading-snug min-w-[56px] text-center">
+              <div class="opacity-70">จำนวน</div>
+              <div class="text-xl font-extrabold text-gray-900">${val}</div>
+            </div>
+            <div class="flex-1 flex justify-end">
+              <input type="number" inputmode="numeric" id="qty-${id}"
+                class="border rounded-2xl px-2 py-3 text-center w-24 sm:w-28 text-lg font-semibold"
+                value="${val}" min="0"
+                oninput="onQtyInput('${id}', '${escapeHtml(it[thresholdField])}')">
+            </div>
+          ` : `
+            <div class="flex items-center gap-2 flex-1 justify-end">
+              <button type="button" class="w-11 h-11 rounded-2xl border bg-white text-lg font-semibold active:scale-95 shadow-sm"
+                onclick="changeQty('${id}', '${escapeHtml(it[thresholdField])}', -1)">➖</button>
+              <input type="number" inputmode="numeric" id="qty-${id}"
+                class="border rounded-2xl px-2 py-3 text-center w-24 sm:w-28 text-lg font-semibold"
+                value="${val}" min="0"
+                oninput="onQtyInput('${id}', '${escapeHtml(it[thresholdField])}')">
+              <button type="button" class="w-11 h-11 rounded-2xl border bg-white text-lg font-semibold active:scale-95 shadow-sm"
+                onclick="changeQty('${id}', '${escapeHtml(it[thresholdField])}', 1)">➕</button>
+            </div>
+          `}
         </div>
         <div id="warn-${id}" class="hidden mt-3 text-xs text-red-700 bg-red-50 border border-red-200 p-2 rounded-lg">
           ⚠ ต่ำกว่าขั้นต่ำ แนะนำสั่งเพิ่ม
