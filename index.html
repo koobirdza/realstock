@@ -14,7 +14,9 @@
 <link rel="manifest" href="manifest.json" />
 <link rel="apple-touch-icon" href="icons/icon-192.png" />
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   body { font-family:'Prompt',sans-serif; }
@@ -32,7 +34,7 @@
 
   <div class="flex items-center justify-between mb-4">
     <h1 class="text-2xl font-bold">🍲 ระบบเช็คสต๊อค • เจริญไทยสุกี้</h1>
-    <div class="text-xs text-gray-500">v17 (Stock Count UI for Storage)</div>
+    <div class="text-xs text-gray-500">v21 (Lazy Dashboard + Faster UI)</div>
   </div>
 
   <div id="login-page">
@@ -128,6 +130,7 @@
   </div>
 
   <div id="dashboard-page" class="hidden">
+    <div id="dash-loading" class="hidden mb-3 text-sm text-gray-500">กำลังโหลด Dashboard...</div>
     <div class="flex justify-between items-center mb-6 gap-3 flex-wrap">
       <button id="dashBackBtn" class="bg-gray-400 text-white px-4 py-2 rounded-xl">⬅ กลับ</button>
       <h2 class="font-semibold text-lg">📊 Dashboard</h2>
@@ -184,7 +187,7 @@
 </div>
 
 <script>
-const VERSION = "v19";
+const VERSION = "v21";
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwSOEIId8C7BVTxCYwiJoSG7N7k4OSy1TfZXJyDHSD2AWSJ7NWGboHYIqMtqbqP2ISn4Q/exec";
 const stockData = {
   "front": {
@@ -6202,7 +6205,7 @@ function getWeeklyUsageValue(item){
 async function loadWeeklyUsageMap(){
   if(!(currentCategory==="stock" && currentAction==="count")){ weeklyUsageMap = {}; weeklyUsageMeta = {}; return; }
   try{
-    const res = await fetch(GOOGLE_SCRIPT_URL + "?action=getWeeklyUsage&v=" + encodeURIComponent(VERSION));
+    const res = await fetch(GOOGLE_SCRIPT_URL + "?action=getWeeklyUsage&v=" + encodeURIComponent(VERSION), { cache:"no-store" });
     const data = await res.json();
     weeklyUsageMap = data?.map || {};
     weeklyUsageMeta = data?.meta || {};
@@ -6231,13 +6234,43 @@ function getModeClass(){
 }
 
 function storageKey(id){ return `qty:${VERSION}:${id}`; }
-function saveQty(id, v){ localStorage.setItem(storageKey(id), String(v)); }
+const qtyWriteBuffer = {};
+let qtyFlushTimer = null;
+
+function flushQtyBuffer(){
+  const keys = Object.keys(qtyWriteBuffer);
+  if(!keys.length) return;
+  keys.forEach(key => {
+    try { localStorage.setItem(key, qtyWriteBuffer[key]); } catch(err){ console.warn("localStorage write failed", err); }
+    delete qtyWriteBuffer[key];
+  });
+  qtyFlushTimer = null;
+}
+
+function scheduleQtyFlush(delay = 180){
+  if(qtyFlushTimer) return;
+  qtyFlushTimer = setTimeout(flushQtyBuffer, delay);
+}
+
+function saveQty(id, v){
+  qtyWriteBuffer[storageKey(id)] = String(v);
+  scheduleQtyFlush();
+}
+
 function getSavedQty(id){
-  const raw = localStorage.getItem(storageKey(id));
+  const key = storageKey(id);
+  if(Object.prototype.hasOwnProperty.call(qtyWriteBuffer, key)){
+    const n = parseInt(qtyWriteBuffer[key], 10);
+    return Number.isFinite(n) ? n : 0;
+  }
+  const raw = localStorage.getItem(key);
   if(raw === null) return null;
   const n = parseInt(raw, 10);
   return Number.isFinite(n) ? n : 0;
 }
+
+window.addEventListener("pagehide", flushQtyBuffer);
+document.addEventListener("visibilitychange", () => { if(document.hidden) flushQtyBuffer(); });
 
 function buildItemId(index){
   return [currentAction,currentCategory,currentSubMain,currentSubCategory,index].filter(Boolean).join(":");
@@ -6328,8 +6361,37 @@ function backFromItems(){
   showPage("subcategory-page");
 }
 
-function openDashboard(){
+let chartJsLoader = null;
+let dashboardLoadedOnce = false;
+
+function ensureChartJs(){
+  if(window.Chart) return Promise.resolve();
+  if(chartJsLoader) return chartJsLoader;
+  chartJsLoader = new Promise((resolve, reject) => {
+    const s = document.createElement("script");
+    s.src = "https://cdn.jsdelivr.net/npm/chart.js";
+    s.async = true;
+    s.onload = () => resolve();
+    s.onerror = () => reject(new Error("โหลด Chart.js ไม่สำเร็จ"));
+    document.head.appendChild(s);
+  });
+  return chartJsLoader;
+}
+
+async function openDashboard(){
   showPage("dashboard-page");
+  const loading = document.getElementById("dash-loading");
+  if(loading) loading.classList.remove("hidden");
+  try{
+    await ensureChartJs();
+    await loadDashboard();
+    dashboardLoadedOnce = true;
+  }catch(err){
+    console.error(err);
+    alert("โหลด Dashboard ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
+  }finally{
+    if(loading) loading.classList.add("hidden");
+  }
 }
 
 function renderHomeCategories(){
@@ -6579,12 +6641,13 @@ async function saveRecords(){
 }
 
 async function loadDashboard(){
+  if(!window.Chart){ throw new Error("Chart.js not ready"); }
   const start = document.getElementById("startDate").value;
   const end = document.getElementById("endDate").value;
   const dashAction = document.getElementById("dashAction").value;
   if(!start || !end) return alert("กรุณาเลือกช่วงวันที่");
 
-  const res = await fetch(GOOGLE_SCRIPT_URL + "?action=getData&v=" + encodeURIComponent(VERSION));
+  const res = await fetch(GOOGLE_SCRIPT_URL + "?action=getData&v=" + encodeURIComponent(VERSION), { cache:"no-store" });
   const data = await res.json();
 
   let stock={}, front={}, kitchen={}, bar={}, destSum={};
@@ -6604,6 +6667,7 @@ async function loadDashboard(){
     }
   });
 
+  await new Promise(requestAnimationFrame);
   renderChart("stockChart", stock);
   renderChart("frontChart", front);
   renderChart("kitchenChart", kitchen);
