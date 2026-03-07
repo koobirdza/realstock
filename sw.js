@@ -1,20 +1,20 @@
-const VERSION = "v23-no-dashboard";
+const VERSION = "v22-worker";
 const STATIC_CACHE = `realstock-static-${VERSION}`;
 const APP_SHELL = ["./", "./index.html", "./manifest.json"];
 
 self.addEventListener("install", (event) => {
   self.skipWaiting();
   event.waitUntil(
-    caches.open(STATIC_CACHE).then((cache) => cache.addAll(APP_SHELL)).catch(() => null)
+    caches.open(STATIC_CACHE)
+      .then((cache) => cache.addAll(APP_SHELL))
+      .catch(() => null)
   );
 });
 
 self.addEventListener("activate", (event) => {
   event.waitUntil((async () => {
     const keys = await caches.keys();
-    await Promise.all(
-      keys.filter((key) => key !== STATIC_CACHE).map((key) => caches.delete(key))
-    );
+    await Promise.all(keys.filter((key) => key !== STATIC_CACHE).map((key) => caches.delete(key)));
     if ("navigationPreload" in self.registration) {
       try { await self.registration.navigationPreload.enable(); } catch (e) {}
     }
@@ -34,7 +34,8 @@ self.addEventListener("fetch", (event) => {
   const req = event.request;
   if (req.method !== "GET") return;
 
-  if (!isSameOrigin(req.url)) return;
+  const url = req.url;
+  if (!isSameOrigin(url)) return;
 
   const accept = req.headers.get("accept") || "";
   const isDocument = req.mode === "navigate" || accept.includes("text/html");

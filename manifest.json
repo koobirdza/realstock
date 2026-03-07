@@ -1,9 +1,9 @@
 {
-  "name": "ระบบเช็คสต๊อคพนักงาน",
-  "short_name": "realstock",
+  "name": "เจริญไทยสุกี้ • ระบบเช็คสต๊อคพนักงาน",
+  "short_name": "Stock Worker",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#fff7ed",
+  "background_color": "#ffffff",
   "theme_color": "#f97316",
   "icons": [
     {
