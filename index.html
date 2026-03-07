@@ -17,6 +17,7 @@
 <link rel="apple-touch-icon" href="icons/icon-192.png" />
 
 <script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
@@ -34,7 +35,7 @@
 
   <div class="flex items-center justify-between mb-4">
     <h1 class="text-2xl font-bold">🍲 ระบบเช็คสต๊อค • เจริญไทยสุกี้</h1>
-    <div class="text-xs text-gray-500">v11 (Worker Only)</div>
+    <div class="text-xs text-gray-500">v11 (GitHub Stable)</div>
   </div>
 
   <div id="login-page">
@@ -50,7 +51,7 @@
     <div class="flex justify-between items-center mb-6 flex-wrap gap-3">
       <div>👤 <span id="empDisplay" class="font-semibold"></span></div>
       <div class="flex gap-4">
-        <button id="logoutBtn" class="text-red-500">ออกจากระบบ</button>
+<button id="logoutBtn" class="text-red-500">ออกจากระบบ</button>
       </div>
     </div>
 
@@ -118,7 +119,7 @@
 </div>
 
 <script>
-const VERSION = "v11-worker";
+const VERSION = "v23";
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwSOEIId8C7BVTxCYwiJoSG7N7k4OSy1TfZXJyDHSD2AWSJ7NWGboHYIqMtqbqP2ISn4Q/exec";
 
 const stockItems = {
@@ -384,7 +385,6 @@ async function saveRecords(){
   }
 }
 
-
 document.getElementById("loginBtn").addEventListener("click", login);
 document.getElementById("logoutBtn").addEventListener("click", logout);
 document.getElementById("backBtn").addEventListener("click", goHome);
@@ -403,7 +403,7 @@ startApp();
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try{
-      const reg = await navigator.serviceWorker.register("./sw.js?v=" + VERSION);
+      const reg = await navigator.serviceWorker.register("./sw.js");
       if (reg && reg.update) reg.update();
       let refreshing = false;
       navigator.serviceWorker.addEventListener("controllerchange", () => {
