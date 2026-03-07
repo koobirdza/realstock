@@ -1,6 +1,6 @@
-const VERSION = "v23-worker";
+const VERSION = "v21";
 const STATIC_CACHE = `realstock-static-${VERSION}`;
-const APP_SHELL = ["./", "./index.html", "./manifest.json", "./icons/icon-192.png"];
+const APP_SHELL = ["./", "./index.html", "./manifest.json"];
 
 self.addEventListener("install", (event) => {
   self.skipWaiting();
