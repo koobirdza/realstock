@@ -6,18 +6,17 @@
 <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0" />
 <meta http-equiv="Pragma" content="no-cache" />
 <meta http-equiv="Expires" content="0" />
-<title>เจริญไทยสุกี้ • ระบบเช็คสต๊อคพนักงาน</title>
+<title>เจริญไทยสุกี้ • ระบบเช็คสต๊อค</title>
 
 <meta name="theme-color" content="#f97316" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-<meta name="apple-mobile-web-app-title" content="Stock" />
+<meta name="apple-mobile-web-app-title" content="Stock Worker" />
 
 <link rel="manifest" href="manifest.json" />
 <link rel="apple-touch-icon" href="icons/icon-192.png" />
 
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
@@ -34,8 +33,8 @@
 <div class="max-w-6xl mx-auto p-6">
 
   <div class="flex items-center justify-between mb-4">
-    <h1 class="text-2xl font-bold">🍲 ระบบเช็คสต๊อค • เจริญไทยสุกี้</h1>
-    <div class="text-xs text-gray-500">v11 (GitHub Stable)</div>
+    <h1 class="text-2xl font-bold">🍲 ระบบเช็คสต๊อคพนักงาน • เจริญไทยสุกี้</h1>
+    <div class="text-xs text-gray-500">v22 (Worker Mode • Faster)</div>
   </div>
 
   <div id="login-page">
@@ -119,7 +118,7 @@
 </div>
 
 <script>
-const VERSION = "v11";
+const VERSION = "v22-worker";
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwSOEIId8C7BVTxCYwiJoSG7N7k4OSy1TfZXJyDHSD2AWSJ7NWGboHYIqMtqbqP2ISn4Q/exec";
 
 const stockItems = {
@@ -176,9 +175,26 @@ function getDestName(dest){
 }
 
 function storageKey(id){ return `qty:${VERSION}:${id}`; }
-function saveQty(id, v){ localStorage.setItem(storageKey(id), String(v)); }
+const qtyMemory = {};
+let qtyFlushTimer = null;
+function flushQtyMemory(){
+  Object.entries(qtyMemory).forEach(([k,v]) => localStorage.setItem(k, String(v)));
+}
+function scheduleQtyFlush(){
+  if(qtyFlushTimer) clearTimeout(qtyFlushTimer);
+  qtyFlushTimer = setTimeout(() => {
+    flushQtyMemory();
+    qtyFlushTimer = null;
+  }, 120);
+}
+function saveQty(id, v){
+  qtyMemory[storageKey(id)] = v;
+  scheduleQtyFlush();
+}
 function getSavedQty(id){
-  const raw = localStorage.getItem(storageKey(id));
+  const key = storageKey(id);
+  if(key in qtyMemory) return qtyMemory[key];
+  const raw = localStorage.getItem(key);
   if(raw === null) return null;
   const n = parseInt(raw, 10);
   return Number.isFinite(n) ? n : 0;
@@ -230,6 +246,7 @@ function goHome(){
   document.getElementById("home-page").classList.remove("hidden");
   document.getElementById("category-page").classList.add("hidden");
 }
+
 function openCategory(cat){
   currentCategory = cat;
   if(currentAction==="issue" && currentCategory!=="stock"){
@@ -349,6 +366,7 @@ function clearInputs(){
 
 async function saveRecords(){
   try{
+    flushQtyMemory();
     const items = stockItems[currentCategory] || [];
     if(currentAction==="issue" && currentCategory!=="stock"){
       return alert("โหมดเบิกของ: ต้องเบิกจากหมวด “ห้องสต๊อก” เท่านั้นค่ะ");
@@ -385,6 +403,7 @@ async function saveRecords(){
   }
 }
 
+
 document.getElementById("loginBtn").addEventListener("click", login);
 document.getElementById("logoutBtn").addEventListener("click", logout);
 document.getElementById("backBtn").addEventListener("click", goHome);
@@ -399,6 +418,9 @@ document.getElementById("saveBtn").addEventListener("click", saveRecords);
 document.getElementById("clearBtn").addEventListener("click", clearInputs);
 
 startApp();
+
+window.addEventListener("pagehide", flushQtyMemory);
+window.addEventListener("beforeunload", flushQtyMemory);
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
