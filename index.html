@@ -33,7 +33,7 @@
 
   <div class="flex items-center justify-between mb-4">
     <h1 class="text-2xl font-bold">🍲 ระบบเช็คสต๊อค • เจริญไทยสุกี้</h1>
-    <div class="text-xs text-gray-500">v23 (Worker Only • Stable)</div>
+    <div class="text-xs text-gray-500">v25 (Login Hotfix • Cache Reset)</div>
   </div>
 
   <div id="login-page">
@@ -133,7 +133,7 @@
     </div>
   </div>
 <script>
-const VERSION = "v25.0-github-hotfix";
+const VERSION = "v25.0-login-hotfix";
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwSOEIId8C7BVTxCYwiJoSG7N7k4OSy1TfZXJyDHSD2AWSJ7NWGboHYIqMtqbqP2ISn4Q/exec";
 const stockData = {
   "front": {
@@ -7002,6 +7002,25 @@ function buildItemId(index){
   return [currentAction,currentCategory,currentSubMain,currentSubCategory,index].filter(Boolean).join(":");
 }
 
+
+async function resetLegacyClientCacheOnce(){
+  const KEY = "REALSTOCK_CACHE_RESET_V25_DONE";
+  try{
+    if(sessionStorage.getItem(KEY)==="1") return;
+    sessionStorage.setItem(KEY,"1");
+    if ("serviceWorker" in navigator) {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map(r => r.unregister().catch(() => false)));
+    }
+    if (window.caches && caches.keys) {
+      const keys = await caches.keys();
+      await Promise.all(keys.map(k => caches.delete(k).catch(() => false)));
+    }
+  }catch(err){
+    console.warn("cache reset skipped", err);
+  }
+}
+
 function startApp(){
   employee = localStorage.getItem("employee") || "";
   if(!employee) return;
@@ -7321,158 +7340,13 @@ function getToCategoryName(){
   return "";
 }
 
-
-function setSavingState(isSaving, label){
-  const btn = document.getElementById("saveBtn");
-  const hint = document.getElementById("savingHint");
-  if(btn){
-    btn.disabled = !!isSaving;
-    btn.classList.toggle("opacity-70", !!isSaving);
-    btn.textContent = isSaving ? (label || "กำลังบันทึก…") : "💾 บันทึก";
-  }
-  if(hint){
-    hint.classList.toggle("hidden", !isSaving);
-    hint.textContent = isSaving ? (label || "กำลังบันทึก…") : "กำลังบันทึก…";
-  }
-}
-
-function makeRequestId(){
-  return "req_" + Date.now() + "_" + Math.random().toString(36).slice(2, 8);
-}
-
-function cachePendingSubmission(payload){
-  localStorage.setItem("stock_pending_submission", JSON.stringify({
-    savedAt: new Date().toISOString(),
-    payload
-  }));
-}
-
-function clearPendingSubmission(){
-  localStorage.removeItem("stock_pending_submission");
-}
-
-function probeServer(timeoutMs = 8000){
-  return new Promise((resolve, reject) => {
-    const controller = new AbortController();
-    const timer = setTimeout(() => {
-      controller.abort();
-      reject(new Error("ping_timeout"));
-    }, timeoutMs);
-
-    fetch(GOOGLE_SCRIPT_URL + "?action=ping&t=" + Date.now(), {
-      method: "GET",
-      mode: "no-cors",
-      cache: "no-store",
-      signal: controller.signal
-    }).then(() => {
-      clearTimeout(timer);
-      resolve(true);
-    }).catch((err) => {
-      clearTimeout(timer);
-      reject(err || new Error("ping_failed"));
-    });
-  });
-}
-
-function submitViaIframe(records, timeoutMs = 20000){
-  return new Promise((resolve, reject) => {
-    const requestId = makeRequestId();
-    const iframeName = "submit_frame_" + requestId;
-    const iframe = document.createElement("iframe");
-    iframe.name = iframeName;
-    iframe.style.display = "none";
-    iframe.setAttribute("aria-hidden", "true");
-
-    const form = document.createElement("form");
-    form.method = "POST";
-    form.action = GOOGLE_SCRIPT_URL;
-    form.target = iframeName;
-    form.style.display = "none";
-
-    const appendField = (name, value) => {
-      const input = document.createElement("input");
-      input.type = "hidden";
-      input.name = name;
-      input.value = value;
-      form.appendChild(input);
-    };
-
-    appendField("transport", "iframe");
-    appendField("request_id", requestId);
-    appendField("payload", JSON.stringify(records));
-
-    let settled = false;
-    let loadSeen = false;
-
-    const cleanup = () => {
-      window.removeEventListener("message", onMessage);
-      iframe.removeEventListener("load", onLoad);
-      clearTimeout(timer);
-      setTimeout(() => {
-        try { form.remove(); } catch (e) {}
-        try { iframe.remove(); } catch (e) {}
-      }, 0);
-    };
-
-    const finish = (fn, value) => {
-      if (settled) return;
-      settled = true;
-      cleanup();
-      fn(value);
-    };
-
-    const onMessage = (event) => {
-      const data = event.data || {};
-      if (!data || data.source !== "stock-apps-script") return;
-      if (data.requestId !== requestId) return;
-
-      if (data.ok) {
-        finish(resolve, data);
-      } else {
-        finish(reject, new Error(data.message || "server_error"));
-      }
-    };
-
-    const onLoad = () => {
-      loadSeen = true;
-    };
-
-    const timer = setTimeout(() => {
-      const baseMessage = loadSeen ? "server_no_ack" : "network_timeout";
-      finish(reject, new Error(baseMessage));
-    }, timeoutMs);
-
-    window.addEventListener("message", onMessage);
-    iframe.addEventListener("load", onLoad);
-
-    document.body.appendChild(iframe);
-    document.body.appendChild(form);
-    form.submit();
-  });
-}
-
-function friendlySaveError(err){
-  const msg = String(err && err.message ? err.message : err || "");
-  if (msg.includes("ping_timeout") || msg.includes("network_timeout")) {
-    return "เชื่อมต่อปลายทางช้าเกินไป กรุณาลองใหม่อีกครั้ง";
-  }
-  if (msg.includes("Failed to fetch") || msg.includes("Load failed") || msg.includes("NetworkError")) {
-    return "ไม่สามารถเชื่อมต่ออินเทอร์เน็ตหรือปลายทาง Apps Script ได้";
-  }
-  if (msg.includes("server_no_ack")) {
-    return "ส่งข้อมูลออกไปแล้ว แต่ไม่ได้รับการยืนยันกลับจากเซิร์ฟเวอร์";
-  }
-  return msg || "เกิดข้อผิดพลาดระหว่างบันทึกข้อมูล";
-}
-
-
 async function saveRecords(){
-  const items = getItemsForCurrentView();
-  const thresholdField = getThresholdField();
-  const thresholdLabel = getThresholdLabel();
-  const today = new Date().toISOString();
-
   try{
+    const items = getItemsForCurrentView();
+    const thresholdField = getThresholdField();
+    const thresholdLabel = getThresholdLabel();
+    const today = new Date().toISOString();
+
     if(currentAction==="issue" && currentCategory==="stock" && !currentIssueDestination){
       alert("กรุณาเลือกปลายทางการเบิกของก่อนบันทึก");
       return;
@@ -7483,7 +7357,6 @@ async function saveRecords(){
       const qty = String(getSavedQty(id) ?? 0);
       const displayName = `${it.no}. ${it.name}${it.brand && it.brand !== "-" ? " • " + it.brand : ""}`;
       return {
-        requestId: null,
         date: today,
         employee,
         action: currentAction,
@@ -7502,38 +7375,24 @@ async function saveRecords(){
         fromCategory: getFromCategoryName(),
         toCategory: getToCategoryName()
       };
-    }).filter(r => Number(r.qty) > 0 || currentAction === "count");
+    });
 
-    if (!records.length) {
-      alert(currentAction === "issue" ? "ยังไม่ได้กรอกจำนวนที่ต้องการเบิก" : "ยังไม่มีรายการสำหรับบันทึก");
-      return;
-    }
+    const btn = document.getElementById("saveBtn");
+    const hint = document.getElementById("savingHint");
+    if(btn){ btn.disabled = true; btn.classList.add("opacity-70"); btn.textContent = "กำลังบันทึก…"; }
+    if(hint){ hint.classList.remove("hidden"); }
 
-    setSavingState(true, "ตรวจสอบการเชื่อมต่อ…");
-    await probeServer(8000);
+    await fetch(GOOGLE_SCRIPT_URL, { method:"POST", mode:"no-cors", body: JSON.stringify(records) });
 
-    const requestId = makeRequestId();
-    records.forEach(r => r.requestId = requestId);
-    cachePendingSubmission({ requestId, records });
-
-    setSavingState(true, "กำลังส่งข้อมูล…");
-    await submitViaIframe(records, 20000);
-
-    clearPendingSubmission();
-    setSavingState(false);
+    if(btn){ btn.disabled = false; btn.classList.remove("opacity-70"); btn.textContent = "💾 บันทึก"; }
+    if(hint){ hint.classList.add("hidden"); }
 
     const lowText = document.getElementById("lowCountBadge")?.textContent || "";
-    alert("✅ บันทึกสำเร็จ" + (lowText ? "
-⚠ " + lowText : ""));
+    alert("✅ บันทึกสำเร็จ" + (lowText ? "\n⚠ " + lowText : ""));
     goHome();
   }catch(err){
-    console.error("saveRecords failed", err);
-    setSavingState(false);
-    const pendingRaw = localStorage.getItem("stock_pending_submission");
-    const pendingText = pendingRaw ? "
-
-ข้อมูลชุดล่าสุดถูกเก็บไว้ในเครื่องแล้ว ยังไม่ถูกลบทิ้ง" : "";
-    alert("❌ " + friendlySaveError(err) + pendingText);
+    console.error(err);
+    alert("❌ ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้");
   }
 }
 
@@ -7578,37 +7437,11 @@ bind("subcategory-list", "click", (e) => {
   openItems();
 });
 
-startApp();
 
-if ("serviceWorker" in navigator) {
-  let refreshing = false;
-  navigator.serviceWorker.addEventListener("controllerchange", () => {
-    if (refreshing) return;
-    refreshing = true;
-    window.location.reload();
-  });
-
-  window.addEventListener("load", async () => {
-    try{
-      const reg = await navigator.serviceWorker.register("./sw.js?v=" + VERSION);
-      if (reg.waiting) {
-        reg.waiting.postMessage({ type: "SKIP_WAITING" });
-      }
-      reg.addEventListener("updatefound", () => {
-        const newWorker = reg.installing;
-        if (!newWorker) return;
-        newWorker.addEventListener("statechange", () => {
-          if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
-            newWorker.postMessage({ type: "SKIP_WAITING" });
-          }
-        });
-      });
-      setInterval(() => reg.update(), 60000);
-    }catch(e){
-      console.error("SW registration failed", e);
-    }
-  });
-}
+window.addEventListener("load", async () => {
+  await resetLegacyClientCacheOnce();
+  startApp();
+});
 </script>
 </body>
 </html>
