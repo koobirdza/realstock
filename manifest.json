@@ -1,8 +1,7 @@
 {
-  "name": "เจริญไทยสุกี้ • ระบบเช็คสต๊อคพนักงาน",
+  "name": "RealStock Refactor v30",
   "short_name": "RealStock",
-  "start_url": "./index.html?v=v25.0-login-hotfix",
-  "scope": "./",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#fff7ed",
   "theme_color": "#f97316",
