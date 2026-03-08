@@ -33,7 +33,7 @@
 
   <div class="flex items-center justify-between mb-4">
     <h1 class="text-2xl font-bold">🍲 ระบบเช็คสต๊อค • เจริญไทยสุกี้</h1>
-    <div class="text-xs text-gray-500">v28 (Save Fix • buildItemKey Patched)</div>
+    <div class="text-xs text-gray-500">v29 (Count Fix • Final Merged)</div>
   </div>
 
   <div id="login-page">
@@ -133,7 +133,7 @@
     </div>
   </div>
 <script>
-const VERSION = "v28-save-fix";
+const VERSION = "v29-count-fix";
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwSOEIId8C7BVTxCYwiJoSG7N7k4OSy1TfZXJyDHSD2AWSJ7NWGboHYIqMtqbqP2ISn4Q/exec";
 const stockData = {
   "front": {
@@ -7344,6 +7344,7 @@ function getToCategoryName(){
   return "";
 }
 
+
 async function saveRecords(){
   try{
     const items = getItemsForCurrentView();
@@ -7362,6 +7363,7 @@ async function saveRecords(){
       const displayName = `${it.no}. ${it.name}${it.brand && it.brand !== "-" ? " • " + it.brand : ""}`;
       return {
         date: today,
+        timestamp: today,
         employee,
         action: currentAction,
         category: currentAction==="issue" ? "ห้องสต๊อก" : getCurrentCategoryLabel(),
@@ -7386,20 +7388,87 @@ async function saveRecords(){
     if(btn){ btn.disabled = true; btn.classList.add("opacity-70"); btn.textContent = "กำลังบันทึก…"; }
     if(hint){ hint.classList.remove("hidden"); }
 
-    await fetch(GOOGLE_SCRIPT_URL, { method:"POST", mode:"no-cors", body: JSON.stringify(records) });
+    const requestId = `req_${Date.now()}_${Math.random().toString(36).slice(2,8)}`;
+    const result = await submitToAppsScript(records, requestId);
 
     if(btn){ btn.disabled = false; btn.classList.remove("opacity-70"); btn.textContent = "💾 บันทึก"; }
     if(hint){ hint.classList.add("hidden"); }
 
+    if(!result || result.status !== "success"){
+      throw new Error(result?.message || "บันทึกไม่สำเร็จ");
+    }
+
     const lowText = document.getElementById("lowCountBadge")?.textContent || "";
-    alert("✅ บันทึกสำเร็จ" + (lowText ? "\n⚠ " + lowText : ""));
+    alert("✅ บันทึกสำเร็จ" + (lowText ? "
+⚠ " + lowText : ""));
     goHome();
   }catch(err){
     console.error(err);
-    alert("❌ ไม่สามารถบันทึกข้อมูลได้\n" + (err?.message || "Unknown error"));
+    const btn = document.getElementById("saveBtn");
+    const hint = document.getElementById("savingHint");
+    if(btn){ btn.disabled = false; btn.classList.remove("opacity-70"); btn.textContent = "💾 บันทึก"; }
+    if(hint){ hint.classList.add("hidden"); }
+    alert("❌ ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้
+" + (err?.message || "Unknown error"));
   }
 }
 
+function submitToAppsScript(records, requestId){
+  return new Promise((resolve, reject) => {
+    const iframeName = `gas_iframe_${requestId}`;
+    const iframe = document.createElement('iframe');
+    iframe.name = iframeName;
+    iframe.style.display = 'none';
+
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = GOOGLE_SCRIPT_URL;
+    form.target = iframeName;
+    form.style.display = 'none';
+
+    const payloadInput = document.createElement('input');
+    payloadInput.type = 'hidden';
+    payloadInput.name = 'payload';
+    payloadInput.value = JSON.stringify(records);
+    form.appendChild(payloadInput);
+
+    const requestInput = document.createElement('input');
+    requestInput.type = 'hidden';
+    requestInput.name = 'request_id';
+    requestInput.value = requestId;
+    form.appendChild(requestInput);
+
+    let settled = false;
+    const cleanup = () => {
+      window.removeEventListener('message', onMessage);
+      iframe.remove();
+      form.remove();
+    };
+
+    const timer = setTimeout(() => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      reject(new Error('หมดเวลารอการตอบกลับจาก Apps Script'));
+    }, 20000);
+
+    const onMessage = (event) => {
+      const data = event.data || {};
+      if (data.type !== 'apps-script-ack') return;
+      if (data.request_id !== requestId) return;
+      clearTimeout(timer);
+      if (settled) return;
+      settled = true;
+      cleanup();
+      resolve(data.payload || { status: 'unknown' });
+    };
+
+    window.addEventListener('message', onMessage);
+    document.body.appendChild(iframe);
+    document.body.appendChild(form);
+    form.submit();
+  });
+}
 
 const bind = (id, event, handler) => {
   const el = document.getElementById(id);
