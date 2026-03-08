@@ -1,14 +1,8 @@
-const VERSION = "v23-worker";
+const VERSION = "v23-stable";
 const STATIC_CACHE = `realstock-static-${VERSION}`;
-const APP_SHELL = ["./", "./index.html", "./manifest.json"];
 
 self.addEventListener("install", (event) => {
   self.skipWaiting();
-  event.waitUntil(
-    caches.open(STATIC_CACHE)
-      .then((cache) => cache.addAll(APP_SHELL))
-      .catch(() => null)
-  );
 });
 
 self.addEventListener("activate", (event) => {
@@ -33,9 +27,7 @@ function isSameOrigin(url){
 self.addEventListener("fetch", (event) => {
   const req = event.request;
   if (req.method !== "GET") return;
-
-  const url = req.url;
-  if (!isSameOrigin(url)) return;
+  if (!isSameOrigin(req.url)) return;
 
   const accept = req.headers.get("accept") || "";
   const isDocument = req.mode === "navigate" || accept.includes("text/html");
@@ -47,10 +39,7 @@ self.addEventListener("fetch", (event) => {
     if (isDocument) {
       try {
         const preload = await event.preloadResponse;
-        if (preload) {
-          cache.put(req, preload.clone());
-          return preload;
-        }
+        if (preload) return preload;
         const fresh = await fetch(req, { cache: "no-store" });
         cache.put(req, fresh.clone());
         return fresh;
