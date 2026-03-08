@@ -119,15 +119,20 @@
 
     <div id="lowCountBadge" class="text-sm text-red-600 font-semibold mb-2"></div>
     <div id="item-list"></div>
+    <div id="issue-destination-wrap" class="hidden mt-4">
+      <div class="text-sm font-semibold text-gray-700 mb-2">ปลายทางการเบิกของ</div>
+      <div id="issue-destination-buttons" class="grid grid-cols-3 gap-2"></div>
+      <div id="issue-destination-note" class="text-xs text-gray-500 mt-2">เลือกว่าจะเบิกของไปที่ไหนก่อนกดบันทึก</div>
+    </div>
 
-    <div class="pos-footer mt-4 flex gap-2 flex-wrap">
+    <div class="pos-footer mt-4 flex gap-2 flex-wrap>
       <button id="saveBtn" class="bg-emerald-600 text-white px-6 py-3 rounded-2xl shadow text-lg">💾 บันทึก</button>
       <button id="clearBtn" class="bg-gray-200 text-gray-800 px-6 py-3 rounded-2xl shadow text-lg">ล้างค่า</button>
       <span id="savingHint" class="hidden text-sm text-gray-600 self-center">กำลังบันทึก…</span>
     </div>
   </div>
 <script>
-const VERSION = "v23-stable";
+const VERSION = "v24-stock";
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwSOEIId8C7BVTxCYwiJoSG7N7k4OSy1TfZXJyDHSD2AWSJ7NWGboHYIqMtqbqP2ISn4Q/exec";
 const stockData = {
   "front": {
@@ -3079,848 +3084,848 @@ const stockData = {
     "icon": "🗄️",
     "bg": "bg-gray-900",
     "subcategories": {
-    "condiments_mon": {
-        "label": "เครื่องปรุง • นับทุกวันจันทร์",
-        "icon": "🧂",
-        "items": [
-            {
-                "no": 1,
-                "name": "ซอสพริกม้าบิน",
-                "brand": "ม้าบิน",
-                "unit": "ถุง",
-                "minRemain": "24",
-                "minIssue": ""
-            },
-            {
-                "no": 2,
-                "name": "ซอสพริกม้าบิน",
-                "brand": "ม้าบิน",
-                "unit": "ขวด",
-                "minRemain": "24",
-                "minIssue": ""
-            },
-            {
-                "no": 3,
-                "name": "บ๊วยกอ",
-                "brand": "ตราอาเหลียง",
-                "unit": "ขวด",
-                "minRemain": "6",
-                "minIssue": ""
-            },
-            {
-                "no": 4,
-                "name": "ซีอิ๊วดำ",
-                "brand": "ตรานก",
-                "unit": "ขวด",
-                "minRemain": "6",
-                "minIssue": ""
-            },
-            {
-                "no": 5,
-                "name": "ซีอิ๊วดำหวาน ไส้หมู",
-                "brand": "ตราง่วนเชียง",
-                "unit": "ขวด",
-                "minRemain": "6",
-                "minIssue": ""
-            },
-            {
-                "no": 6,
-                "name": "ซอสภูเขาทองฝาเขียว",
-                "brand": "ตราภูเขาทอง",
-                "unit": "ขวด",
-                "minRemain": "24",
-                "minIssue": ""
-            },
-            {
-                "no": 7,
-                "name": "น้ำมันหอย",
-                "brand": "ตราแม่ครัว",
-                "unit": "ขวด",
-                "minRemain": "24",
-                "minIssue": ""
-            },
-            {
-                "no": 8,
-                "name": "น้ำมันหอย",
-                "brand": "ตราแพนด้า",
-                "unit": "ขวด",
-                "minRemain": "1",
-                "minIssue": ""
-            },
-            {
-                "no": 9,
-                "name": "ซีอิ๊วง่วนเชียง สูตร 1",
-                "brand": "ตราง่วนเชียง",
-                "unit": "ขวด",
-                "minRemain": "1",
-                "minIssue": ""
-            },
-            {
-                "no": 10,
-                "name": "คิโคแมน",
-                "brand": "คิโคแมน",
-                "unit": "ขวด",
-                "minRemain": "1",
-                "minIssue": ""
-            },
-            {
-                "no": 11,
-                "name": "แม็กกี้ฝาแดง",
-                "brand": "แม็กกี้",
-                "unit": "ขวด",
-                "minRemain": "1",
-                "minIssue": ""
-            },
-            {
-                "no": 12,
-                "name": "น้ำมันหอย",
-                "brand": "ตราแม่ครัว",
-                "unit": "ขวด",
-                "minRemain": "24",
-                "minIssue": ""
-            },
-            {
-                "no": 13,
-                "name": "จิ๊กโฉ่ว",
-                "brand": "ตราหัวกวาง",
-                "unit": "ขวด",
-                "minRemain": "6",
-                "minIssue": ""
-            },
-            {
-                "no": 14,
-                "name": "จิ๊กโฉ่วกระเพาะปลา",
-                "brand": "ตรา Greatwall กำแพงเมืองจีน",
-                "unit": "ขวด",
-                "minRemain": "1",
-                "minIssue": ""
-            },
-            {
-                "no": 15,
-                "name": "น้ำปลา",
-                "brand": "ตราปลาและวิว",
-                "unit": "ขวด",
-                "minRemain": "12",
-                "minIssue": ""
-            },
-            {
-                "no": 16,
-                "name": "น้ำตาล",
-                "brand": "ตราวังขนาย",
-                "unit": "ถุง",
-                "minRemain": "25",
-                "minIssue": ""
-            },
-            {
-                "no": 17,
-                "name": "น้ำตาล",
-                "brand": "ตรามิตรผล",
-                "unit": "ถุง",
-                "minRemain": "25",
-                "minIssue": ""
-            },
-            {
-                "no": 18,
-                "name": "ราชาชูรส",
-                "brand": "ราชาชูรส",
-                "unit": "ถุง",
-                "minRemain": "25",
-                "minIssue": ""
-            }
-        ]
-    },
-    "rice_mon": {
-        "label": "เส้น / ข้าว • นับทุกวันจันทร์",
-        "icon": "🍚",
-        "items": [
-            {
-                "no": 1,
-                "name": "วุ้นเส้น",
-                "brand": "ตราท่าเรือระแท่น",
-                "unit": "ถุง",
-                "minRemain": "2",
-                "minIssue": ""
-            },
-            {
-                "no": 2,
-                "name": "หมี่ฮ่องกง",
-                "brand": "ตรากระต่าย",
-                "unit": "ถุง",
-                "minRemain": "6",
-                "minIssue": ""
-            },
-            {
-                "no": 3,
-                "name": "ข้าวหอม",
-                "brand": "ตรานกกระยางคู่",
-                "unit": "กระสอบ",
-                "minRemain": "1",
-                "minIssue": ""
-            },
-            {
-                "no": 4,
-                "name": "ข้าวหอม",
-                "brand": "ตราไดโนเสาร์",
-                "unit": "กระสอบ",
-                "minRemain": "1",
-                "minIssue": ""
-            },
-            {
-                "no": 5,
-                "name": "ข้าวหอม",
-                "brand": "ตราเลิศธัญญา",
-                "unit": "กระสอบ",
-                "minRemain": "1",
-                "minIssue": ""
-            },
-            {
-                "no": 6,
-                "name": "ข้าวขาว",
-                "brand": "ตรา 3 แอปเปิ้ล",
-                "unit": "กระสอบ",
-                "minRemain": "1",
-                "minIssue": ""
-            }
-        ]
-    },
-    "sauces_wed": {
-        "label": "ซอส / เครื่องปรุง • นับวันพุธ",
-        "icon": "🥫",
-        "items": [
-            {
-                "no": 1,
-                "name": "ซอสมะเขือเทศ",
-                "brand": "โรซ่า",
-                "unit": "ถุง",
-                "minRemain": "3",
-                "minIssue": ""
-            },
-            {
-                "no": 2,
-                "name": "น้ำจิ้มไก่",
-                "brand": "ตราแม่ประนอม",
-                "unit": "ขวด",
-                "minRemain": "3",
-                "minIssue": ""
-            },
-            {
-                "no": 3,
-                "name": "พริกเผา",
-                "brand": "ฉั่วฮะเส็ง",
-                "unit": "กระปุก",
-                "minRemain": "3",
-                "minIssue": ""
-            },
-            {
-                "no": 4,
-                "name": "น้ำพริกเผา",
-                "brand": "ฉั่วฮะเส็ง",
-                "unit": "ขวด",
-                "minRemain": "3",
-                "minIssue": ""
-            },
-            {
-                "no": 5,
-                "name": "พริกไทยป่น",
-                "brand": "ตรามือ",
-                "unit": "ถุง",
-                "minRemain": "2",
-                "minIssue": ""
-            },
-            {
-                "no": 6,
-                "name": "เหลาไฉฮะ",
-                "brand": "ตรานกยูง",
-                "unit": "ขวด",
-                "minRemain": "1",
-                "minIssue": ""
-            },
-            {
-                "no": 7,
-                "name": "เหล้าจีน J.S.C",
-                "brand": "ตราเจดีย์",
-                "unit": "ขวด",
-                "minRemain": "1",
-                "minIssue": ""
-            },
-            {
-                "no": 8,
-                "name": "เหล้าขาว",
-                "brand": "โรงงานสุรา",
-                "unit": "ขวด",
-                "minRemain": "1",
-                "minIssue": ""
-            },
-            {
-                "no": 9,
-                "name": "เซ้งกอ (เครื่องผัดโหวงก๊วย)",
-                "brand": "-",
-                "unit": "กระปุก",
-                "minRemain": "1",
-                "minIssue": ""
-            },
-            {
-                "no": 10,
-                "name": "ตั้งไฉ่",
-                "brand": "ตราอาเหลียง",
-                "unit": "กระปุก",
-                "minRemain": "2",
-                "minIssue": ""
-            },
-            {
-                "no": 11,
-                "name": "ผงหมักเนื้อ",
-                "brand": "เยาวราช",
-                "unit": "ถุง",
-                "minRemain": "5",
-                "minIssue": ""
-            },
-            {
-                "no": 12,
-                "name": "ผงฟู",
-                "brand": "BestFood",
-                "unit": "กระปุก",
-                "minRemain": "1",
-                "minIssue": ""
-            }
-        ]
-    },
-    "dry_wed": {
-        "label": "ของแห้ง • นับวันพุธ",
-        "icon": "🍄",
-        "items": [
-            {
-                "no": 1,
-                "name": "เห็ดหอมแห้ง",
-                "brand": "ร้านเฮียโบ้",
-                "unit": "โล",
-                "minRemain": "1",
-                "minIssue": ""
-            },
-            {
-                "no": 2,
-                "name": "เม็ดมะม่วง",
-                "brand": "ร้านเฮียโบ้",
-                "unit": "โล",
-                "minRemain": "1",
-                "minIssue": ""
-            },
-            {
-                "no": 3,
-                "name": "กระเพาะปลา",
-                "brand": "ร้านเฮียโบ้",
-                "unit": "ถุง",
-                "minRemain": "1",
-                "minIssue": ""
-            },
-            {
-                "no": 4,
-                "name": "เกล็ดขนมปัง",
-                "brand": "ตราดาว",
-                "unit": "ถุง",
-                "minRemain": "2",
-                "minIssue": ""
-            },
-            {
-                "no": 5,
-                "name": "แป้งมันสำปะหลัง",
-                "brand": "ตราปลามังกร",
-                "unit": "ถุง",
-                "minRemain": "2",
-                "minIssue": ""
-            },
-            {
-                "no": 6,
-                "name": "เต้าเจี้ยวบด",
-                "brand": "ตราง่วนเชียง",
-                "unit": "ถัง",
-                "minRemain": "6",
-                "minIssue": ""
-            },
-            {
-                "no": 7,
-                "name": "แห้ว",
-                "brand": "ตรามาริโอ้",
-                "unit": "กระป๋อง",
-                "minRemain": "2",
-                "minIssue": ""
-            },
-            {
-                "no": 8,
-                "name": "หน่อไม้ทะเล",
-                "brand": "ตรา Ideal Gold",
-                "unit": "กระป๋อง",
-                "minRemain": "2",
-                "minIssue": ""
-            },
-            {
-                "no": 9,
-                "name": "หน่อไม้ทะเล",
-                "brand": "ตรา Ocean Blue",
-                "unit": "กระป๋อง",
-                "minRemain": "2",
-                "minIssue": ""
-            }
-        ]
-    },
-    "pack_fri": {
-        "label": "บรรจุภัณฑ์ • นับทุกวันศุกร์",
-        "icon": "🛍️",
-        "items": [
-            {
-                "no": 1,
-                "name": "ถุงร้อน 3x5",
-                "brand": "ตราจระเข้",
-                "unit": "แพ็ค",
-                "minRemain": "6",
-                "minIssue": ""
-            },
-            {
-                "no": 2,
-                "name": "ถุงร้อน 4x6",
-                "brand": "ตราจระเข้",
-                "unit": "แพ็ค",
-                "minRemain": "6",
-                "minIssue": ""
-            },
-            {
-                "no": 3,
-                "name": "ถุงร้อน 5x8",
-                "brand": "ตราจระเข้",
-                "unit": "แพ็ค",
-                "minRemain": "6",
-                "minIssue": ""
-            },
-            {
-                "no": 4,
-                "name": "ถุงร้อน 6x9",
-                "brand": "ตราฟักทอง",
-                "unit": "แพ็ค",
-                "minRemain": "6",
-                "minIssue": ""
-            },
-            {
-                "no": 5,
-                "name": "ถุงร้อน 8x12",
-                "brand": "ARO",
-                "unit": "แพ็ค",
-                "minRemain": "6",
-                "minIssue": ""
-            },
-            {
-                "no": 6,
-                "name": "ถุงร้อน 9x14",
-                "brand": "ตราแอลเอส",
-                "unit": "แพ็ค",
-                "minRemain": "6",
-                "minIssue": ""
-            },
-            {
-                "no": 7,
-                "name": "ถุงเย็น PE 6x9",
-                "brand": "INNOPLUS",
-                "unit": "แพ็ค",
-                "minRemain": "6",
-                "minIssue": ""
-            },
-            {
-                "no": 8,
-                "name": "ถุงเย็น PE 5x8",
-                "brand": "INNOPLUS",
-                "unit": "แพ็ค",
-                "minRemain": "6",
-                "minIssue": ""
-            },
-            {
-                "no": 9,
-                "name": "ถุงเย็น PE 4x6",
-                "brand": "INNOPLUS",
-                "unit": "แพ็ค",
-                "minRemain": "6",
-                "minIssue": ""
-            },
-            {
-                "no": 10,
-                "name": "ถุงหิ้วไม่มีโลโก้ 6x14",
-                "brand": "INNOPLUS",
-                "unit": "แพ็ค",
-                "minRemain": "6",
-                "minIssue": ""
-            },
-            {
-                "no": 11,
-                "name": "ถุงหิ้วไม่มีโลโก้ 9x18",
-                "brand": "ตราเบ็นซ์จรวด",
-                "unit": "แพ็ค",
-                "minRemain": "6",
-                "minIssue": ""
-            },
-            {
-                "no": 12,
-                "name": "ถุงหิ้วไม่มีโลโก้ 12x20",
-                "brand": "ตรากล้วยไม้",
-                "unit": "แพ็ค",
-                "minRemain": "6",
-                "minIssue": ""
-            },
-            {
-                "no": 13,
-                "name": "ถุงหิ้วมีโลโก้ 9x18",
-                "brand": "-",
-                "unit": "แพ็ค",
-                "minRemain": "6",
-                "minIssue": ""
-            },
-            {
-                "no": 14,
-                "name": "ถุงหิ้วมีโลโก้ 12x20",
-                "brand": "-",
-                "unit": "แพ็ค",
-                "minRemain": "6",
-                "minIssue": ""
-            },
-            {
-                "no": 15,
-                "name": "กล่องอาหารใส 750 ml",
-                "brand": "ร้านวันชาติ",
-                "unit": "ชิ้น",
-                "minRemain": "50",
-                "minIssue": ""
-            },
-            {
-                "no": 16,
-                "name": "กล่องอาหารใหญ่ มีโลโก้",
-                "brand": "ร้านวันชาติ",
-                "unit": "ชิ้น",
-                "minRemain": "50",
-                "minIssue": ""
-            },
-            {
-                "no": 17,
-                "name": "กล่องใส่ปลา/ตัว",
-                "brand": "ตรากรตะวัน",
-                "unit": "ชิ้น",
-                "minRemain": "5",
-                "minIssue": ""
-            },
-            {
-                "no": 18,
-                "name": "หนังยางวงเล็ก",
-                "brand": "KW",
-                "unit": "แพ็ค",
-                "minRemain": "1",
-                "minIssue": ""
-            },
-            {
-                "no": 19,
-                "name": "หนังยางวงใหญ่",
-                "brand": "-",
-                "unit": "แพ็ค",
-                "minRemain": "1",
-                "minIssue": ""
-            },
-            {
-                "no": 20,
-                "name": "ถ้วยบั่วสี",
-                "brand": "ร้านวันชาติ",
-                "unit": "ชิ้น",
-                "minRemain": "50",
-                "minIssue": ""
-            },
-            {
-                "no": 21,
-                "name": "ขวด+ฝา น้ำจิ้มสุกี้ 360 ml",
-                "brand": "โอวไถ่ฮง",
-                "unit": "ขวด/ชิ้น",
-                "minRemain": "50",
-                "minIssue": ""
-            },
-            {
-                "no": 22,
-                "name": "กระปุกใส+ฝา ใส่บั่วสี 360 ml",
-                "brand": "ตั้งซุ่นฮวด",
-                "unit": "กระปุก/ชิ้น",
-                "minRemain": "50",
-                "minIssue": ""
-            },
-            {
-                "no": 23,
-                "name": "เทปรัดปากขวด น้ำจิ้มสุกี้",
-                "brand": "-",
-                "unit": "อัน",
-                "minRemain": "50",
-                "minIssue": ""
-            },
-            {
-                "no": 24,
-                "name": "เทปรัดปากขวด บั่วสี",
-                "brand": "-",
-                "unit": "อัน",
-                "minRemain": "50",
-                "minIssue": ""
-            },
-            {
-                "no": 25,
-                "name": "กระดาษห่อข้าว",
-                "brand": "ตราดอกเหมย",
-                "unit": "แพ็ค",
-                "minRemain": "1",
-                "minIssue": ""
-            },
-            {
-                "no": 26,
-                "name": "ฟอยล์อลูมิเนียม",
-                "brand": "ARO",
-                "unit": "ม้วน",
-                "minRemain": "2",
-                "minIssue": ""
-            },
-            {
-                "no": 27,
-                "name": "ที่ซีลอาหาร",
-                "brand": "ARO",
-                "unit": "ม้วน",
-                "minRemain": "2",
-                "minIssue": ""
-            },
-            {
-                "no": 28,
-                "name": "ชุดช้อนส้อม",
-                "brand": "ARO",
-                "unit": "คู่",
-                "minRemain": "24",
-                "minIssue": ""
-            },
-            {
-                "no": 29,
-                "name": "ตะเกียบไม้",
-                "brand": "ARO",
-                "unit": "คู่",
-                "minRemain": "24",
-                "minIssue": ""
-            },
-            {
-                "no": 30,
-                "name": "ไม้เสียบลูกชิ้น",
-                "brand": "ARO",
-                "unit": "แพ็ค",
-                "minRemain": "1",
-                "minIssue": ""
-            }
-        ]
-    },
-    "clean_fri": {
-        "label": "อุปกรณ์ทำความสะอาด • นับทุกวันศุกร์",
-        "icon": "🧽",
-        "items": [
-            {
-                "no": 1,
-                "name": "แฟ้บ",
-                "brand": "Savepak",
-                "unit": "กล่อง",
-                "minRemain": "1",
-                "minIssue": ""
-            },
-            {
-                "no": 2,
-                "name": "กระดาษป๊อปอัพ",
-                "brand": "Festa",
-                "unit": "ห่อ",
-                "minRemain": "50",
-                "minIssue": ""
-            },
-            {
-                "no": 3,
-                "name": "กระดาษทิชชู่ 300 แผ่น/ห่อ",
-                "brand": "Acsept",
-                "unit": "ห่อ",
-                "minRemain": "12",
-                "minIssue": ""
-            },
-            {
-                "no": 4,
-                "name": "กระดาษทิชชู่ 90 แผ่น/ห่อ",
-                "brand": "ARO",
-                "unit": "ห่อ",
-                "minRemain": "2",
-                "minIssue": ""
-            },
-            {
-                "no": 5,
-                "name": "ฟองน้ำหุ้มตาข่าย",
-                "brand": "ตราโพลีเคลี่",
-                "unit": "อัน",
-                "minRemain": "6",
-                "minIssue": ""
-            },
-            {
-                "no": 6,
-                "name": "สก๊อตไบรท์ แผ่นใยขัด",
-                "brand": "Scotch-Brite",
-                "unit": "อัน",
-                "minRemain": "6",
-                "minIssue": ""
-            },
-            {
-                "no": 7,
-                "name": "สก๊อตไบรท์ ฟองน้ำเหลือง",
-                "brand": "Scotch-Brite",
-                "unit": "อัน",
-                "minRemain": "6",
-                "minIssue": ""
-            },
-            {
-                "no": 8,
-                "name": "สก๊อตไบรท์ ตาข่าย",
-                "brand": "Scotch-Brite",
-                "unit": "อัน",
-                "minRemain": "6",
-                "minIssue": ""
-            },
-            {
-                "no": 9,
-                "name": "สก๊อตไบรท์ ฝอยขัดหม้อ",
-                "brand": "Scotch-Brite",
-                "unit": "อัน",
-                "minRemain": "6",
-                "minIssue": ""
-            },
-            {
-                "no": 10,
-                "name": "น้ำยาล้างจาน",
-                "brand": "Savepak",
-                "unit": "ถุง",
-                "minRemain": "6",
-                "minIssue": ""
-            },
-            {
-                "no": 11,
-                "name": "ถุงมือส้ม size L",
-                "brand": "SPK",
-                "unit": "คู่",
-                "minRemain": "6",
-                "minIssue": ""
-            },
-            {
-                "no": 12,
-                "name": "ถุงมือยาง แบบบาง",
-                "brand": "ตราเสือโคร่ง",
-                "unit": "คู่",
-                "minRemain": "5",
-                "minIssue": ""
-            },
-            {
-                "no": 13,
-                "name": "น้ำยาเช็ดกระจก",
-                "brand": "ARO",
-                "unit": "แกลลอน",
-                "minRemain": "1",
-                "minIssue": ""
-            },
-            {
-                "no": 14,
-                "name": "น้ำยาทำความสะอาดพื้น",
-                "brand": "ARO",
-                "unit": "แกลลอน",
-                "minRemain": "1",
-                "minIssue": ""
-            },
-            {
-                "no": 15,
-                "name": "น้ำยาทำความสะอาด",
-                "brand": "Spa Clean",
-                "unit": "แกลลอน",
-                "minRemain": "1",
-                "minIssue": ""
-            },
-            {
-                "no": 16,
-                "name": "ถุงขยะดำ 18x20",
-                "brand": "Winner Power Clean",
-                "unit": "แพ็ค",
-                "minRemain": "1",
-                "minIssue": ""
-            },
-            {
-                "no": 17,
-                "name": "ถุงขยะดำ 24x28",
-                "brand": "Winner Power Clean",
-                "unit": "แพ็ค",
-                "minRemain": "1",
-                "minIssue": ""
-            },
-            {
-                "no": 18,
-                "name": "ถุงขยะดำ 30x40",
-                "brand": "Winner Power Clean",
-                "unit": "แพ็ค",
-                "minRemain": "1",
-                "minIssue": ""
-            }
-        ]
-    },
-    "others_fri": {
-        "label": "อื่นๆ • นับทุกวันศุกร์",
-        "icon": "📦",
-        "items": [
-            {
-                "no": 1,
-                "name": "กระดาษปริ้นออเดอร์",
-                "brand": "-",
-                "unit": "ม้วน",
-                "minRemain": "12",
-                "minIssue": ""
-            },
-            {
-                "no": 2,
-                "name": "สติ๊กเกอร์ปริ้นวันที่",
-                "brand": "Niimbot",
-                "unit": "ม้วน",
-                "minRemain": "3",
-                "minIssue": ""
-            },
-            {
-                "no": 3,
-                "name": "สก๊อตเทปใส เล็ก",
-                "brand": "-",
-                "unit": "ม้วน",
-                "minRemain": "3",
-                "minIssue": ""
-            },
-            {
-                "no": 4,
-                "name": "สก๊อตเทปใส ใหญ่",
-                "brand": "-",
-                "unit": "ม้วน",
-                "minRemain": "3",
-                "minIssue": ""
-            },
-            {
-                "no": 5,
-                "name": "เทปย่น",
-                "brand": "-",
-                "unit": "ม้วน",
-                "minRemain": "2",
-                "minIssue": ""
-            },
-            {
-                "no": 6,
-                "name": "ไวท์บอร์ด",
-                "brand": "-",
-                "unit": "อัน",
-                "minRemain": "1",
-                "minIssue": ""
-            },
-            {
-                "no": 7,
-                "name": "แปรงลบกระดาน",
-                "brand": "-",
-                "unit": "อัน",
-                "minRemain": "1",
-                "minIssue": ""
-            }
-        ]
-    }
+      "seasonings_mon": {
+            "label": "เครื่องปรุง",
+            "icon": "🧂",
+            "items": [
+                  {
+                        "no": 1,
+                        "name": "ซอสพริกม้าบิน",
+                        "brand": "ม้าบิน",
+                        "unit": "ถุง",
+                        "minRemain": "24",
+                        "minIssue": "24"
+                  },
+                  {
+                        "no": 2,
+                        "name": "ซอสพริกม้าบิน",
+                        "brand": "ม้าบิน",
+                        "unit": "ขวด",
+                        "minRemain": "24",
+                        "minIssue": "24"
+                  },
+                  {
+                        "no": 3,
+                        "name": "บ๊วยกอ",
+                        "brand": "ตราอาเหลียง",
+                        "unit": "ขวด",
+                        "minRemain": "6",
+                        "minIssue": "6"
+                  },
+                  {
+                        "no": 4,
+                        "name": "ซีอิ๊วดำ",
+                        "brand": "ตรานก",
+                        "unit": "ขวด",
+                        "minRemain": "6",
+                        "minIssue": "6"
+                  },
+                  {
+                        "no": 5,
+                        "name": "ซีอิ๊วดำหวาน ไส้หมู",
+                        "brand": "ตราง่วนเชียง",
+                        "unit": "ขวด",
+                        "minRemain": "6",
+                        "minIssue": "6"
+                  },
+                  {
+                        "no": 6,
+                        "name": "ซอสภูเขาทองฝาเขียว",
+                        "brand": "ตราภูเขาทอง",
+                        "unit": "ขวด",
+                        "minRemain": "24",
+                        "minIssue": "24"
+                  },
+                  {
+                        "no": 7,
+                        "name": "น้ำมันหอย",
+                        "brand": "ตราแม่ครัว",
+                        "unit": "ขวด",
+                        "minRemain": "24",
+                        "minIssue": "24"
+                  },
+                  {
+                        "no": 8,
+                        "name": "น้ำมันหอย",
+                        "brand": "ตราแพนด้า",
+                        "unit": "ขวด",
+                        "minRemain": "1",
+                        "minIssue": "1"
+                  },
+                  {
+                        "no": 9,
+                        "name": "ซีอิ๊วง่วนเชียง สูตร 1",
+                        "brand": "ตราง่วนเชียง",
+                        "unit": "ขวด",
+                        "minRemain": "1",
+                        "minIssue": "1"
+                  },
+                  {
+                        "no": 10,
+                        "name": "คิโคแมน",
+                        "brand": "คิโคแมน",
+                        "unit": "ขวด",
+                        "minRemain": "1",
+                        "minIssue": "1"
+                  },
+                  {
+                        "no": 11,
+                        "name": "แม็กกี้ฝาแดง",
+                        "brand": "แม็กกี้",
+                        "unit": "ขวด",
+                        "minRemain": "1",
+                        "minIssue": "1"
+                  },
+                  {
+                        "no": 12,
+                        "name": "น้ำมันหอย",
+                        "brand": "ตราแม่ครัว",
+                        "unit": "ขวด",
+                        "minRemain": "24",
+                        "minIssue": "24"
+                  },
+                  {
+                        "no": 13,
+                        "name": "จิ๊กโฉ่ว",
+                        "brand": "ตราหัวกวาง",
+                        "unit": "ขวด",
+                        "minRemain": "6",
+                        "minIssue": "6"
+                  },
+                  {
+                        "no": 14,
+                        "name": "จิ๊กโฉ่วกระเพาะปลา",
+                        "brand": "ตรา Greatwall กำแพงเมืองจีน",
+                        "unit": "ขวด",
+                        "minRemain": "1",
+                        "minIssue": "1"
+                  },
+                  {
+                        "no": 15,
+                        "name": "น้ำปลา",
+                        "brand": "ตราปลาและวิว",
+                        "unit": "ขวด",
+                        "minRemain": "12",
+                        "minIssue": "12"
+                  },
+                  {
+                        "no": 16,
+                        "name": "น้ำตาล",
+                        "brand": "ตราวังขนาย",
+                        "unit": "ถุง",
+                        "minRemain": "25",
+                        "minIssue": "25"
+                  },
+                  {
+                        "no": 17,
+                        "name": "น้ำตาล",
+                        "brand": "ตรามิตรผล",
+                        "unit": "ถุง",
+                        "minRemain": "25",
+                        "minIssue": "25"
+                  },
+                  {
+                        "no": 18,
+                        "name": "ราชาชูรส",
+                        "brand": "ราชาชูรส",
+                        "unit": "ถุง",
+                        "minRemain": "25",
+                        "minIssue": "25"
+                  }
+            ]
+      },
+      "rice_noodle": {
+            "label": "เส้น / ข้าว",
+            "icon": "🍚",
+            "items": [
+                  {
+                        "no": 1,
+                        "name": "วุ้นเส้น",
+                        "brand": "ตราท่าเรือระแท่น",
+                        "unit": "ถุง",
+                        "minRemain": "2",
+                        "minIssue": "2"
+                  },
+                  {
+                        "no": 2,
+                        "name": "หมี่ฮ่องกง",
+                        "brand": "ตรากระต่าย",
+                        "unit": "ถุง",
+                        "minRemain": "6",
+                        "minIssue": "6"
+                  },
+                  {
+                        "no": 3,
+                        "name": "ข้าวหอม",
+                        "brand": "ตรานกกระยางคู่",
+                        "unit": "กระสอบ",
+                        "minRemain": "1",
+                        "minIssue": "1"
+                  },
+                  {
+                        "no": 4,
+                        "name": "ข้าวหอม",
+                        "brand": "ตราไดโนเสาร์",
+                        "unit": "กระสอบ",
+                        "minRemain": "1",
+                        "minIssue": "1"
+                  },
+                  {
+                        "no": 5,
+                        "name": "ข้าวหอม",
+                        "brand": "ตราเลิศธัญญา",
+                        "unit": "กระสอบ",
+                        "minRemain": "1",
+                        "minIssue": "1"
+                  },
+                  {
+                        "no": 6,
+                        "name": "ข้าวขาว",
+                        "brand": "ตรา 3 แอปเปิ้ล",
+                        "unit": "กระสอบ",
+                        "minRemain": "1",
+                        "minIssue": "1"
+                  }
+            ]
+      },
+      "sauces_wed": {
+            "label": "ซอส / เครื่องปรุง",
+            "icon": "🥫",
+            "items": [
+                  {
+                        "no": 1,
+                        "name": "ซอสมะเขือเทศ",
+                        "brand": "โรซ่า",
+                        "unit": "ถุง",
+                        "minRemain": "3",
+                        "minIssue": "3"
+                  },
+                  {
+                        "no": 2,
+                        "name": "น้ำจิ้มไก่",
+                        "brand": "ตราแม่ประนอม",
+                        "unit": "ขวด",
+                        "minRemain": "3",
+                        "minIssue": "3"
+                  },
+                  {
+                        "no": 3,
+                        "name": "พริกเผา",
+                        "brand": "ฉั่วฮะเส็ง",
+                        "unit": "กระปุก",
+                        "minRemain": "3",
+                        "minIssue": "3"
+                  },
+                  {
+                        "no": 4,
+                        "name": "น้ำพริกเผา",
+                        "brand": "ฉั่วฮะเส็ง",
+                        "unit": "ขวด",
+                        "minRemain": "3",
+                        "minIssue": "3"
+                  },
+                  {
+                        "no": 5,
+                        "name": "พริกไทยป่น",
+                        "brand": "ตรามือ",
+                        "unit": "ถุง",
+                        "minRemain": "2",
+                        "minIssue": "2"
+                  },
+                  {
+                        "no": 6,
+                        "name": "เหลาไฉฮะ",
+                        "brand": "ตรานกยูง",
+                        "unit": "ขวด",
+                        "minRemain": "1",
+                        "minIssue": "1"
+                  },
+                  {
+                        "no": 7,
+                        "name": "เหล้าจีน J.S.C",
+                        "brand": "ตราเจดีย์",
+                        "unit": "ขวด",
+                        "minRemain": "1",
+                        "minIssue": "1"
+                  },
+                  {
+                        "no": 8,
+                        "name": "เหล้าขาว",
+                        "brand": "โรงงานสุรา",
+                        "unit": "ขวด",
+                        "minRemain": "1",
+                        "minIssue": "1"
+                  },
+                  {
+                        "no": 9,
+                        "name": "เซ้งกอ (เครื่องผัดโหวงก๊วย)",
+                        "brand": "-",
+                        "unit": "กระปุก",
+                        "minRemain": "1",
+                        "minIssue": "1"
+                  },
+                  {
+                        "no": 10,
+                        "name": "ตั้งไฉ่",
+                        "brand": "ตราอาเหลียง",
+                        "unit": "กระปุก",
+                        "minRemain": "2",
+                        "minIssue": "2"
+                  },
+                  {
+                        "no": 11,
+                        "name": "ผงหมักเนื้อ",
+                        "brand": "เยาวราช",
+                        "unit": "ถุง",
+                        "minRemain": "5",
+                        "minIssue": "5"
+                  },
+                  {
+                        "no": 12,
+                        "name": "ผงฟู",
+                        "brand": "BestFood",
+                        "unit": "กระปุก",
+                        "minRemain": "1",
+                        "minIssue": "1"
+                  }
+            ]
+      },
+      "dry_goods": {
+            "label": "ของแห้ง",
+            "icon": "🫘",
+            "items": [
+                  {
+                        "no": 1,
+                        "name": "เห็ดหอมแห้ง",
+                        "brand": "ร้านเฮียโบ้",
+                        "unit": "โล",
+                        "minRemain": "1",
+                        "minIssue": "1"
+                  },
+                  {
+                        "no": 2,
+                        "name": "เม็ดมะม่วง",
+                        "brand": "ร้านเฮียโบ้",
+                        "unit": "โล",
+                        "minRemain": "1",
+                        "minIssue": "1"
+                  },
+                  {
+                        "no": 3,
+                        "name": "กระเพาะปลา",
+                        "brand": "ร้านเฮียโบ้",
+                        "unit": "ถุง",
+                        "minRemain": "1",
+                        "minIssue": "1"
+                  },
+                  {
+                        "no": 4,
+                        "name": "เกล็ดขนมปัง",
+                        "brand": "ตราดาว",
+                        "unit": "ถุง",
+                        "minRemain": "2",
+                        "minIssue": "2"
+                  },
+                  {
+                        "no": 5,
+                        "name": "แป้งมันสำปะหลัง",
+                        "brand": "ตราปลามังกร",
+                        "unit": "ถุง",
+                        "minRemain": "2",
+                        "minIssue": "2"
+                  },
+                  {
+                        "no": 6,
+                        "name": "เต้าเจี้ยวบด",
+                        "brand": "ตราง่วนเชียง",
+                        "unit": "ถัง",
+                        "minRemain": "6",
+                        "minIssue": "6"
+                  },
+                  {
+                        "no": 7,
+                        "name": "แห้ว",
+                        "brand": "ตรามาริโอ้",
+                        "unit": "กระป๋อง",
+                        "minRemain": "2",
+                        "minIssue": "2"
+                  },
+                  {
+                        "no": 8,
+                        "name": "หน่อไม้ทะเล",
+                        "brand": "ตรา Ideal gold",
+                        "unit": "กระป๋อง",
+                        "minRemain": "2",
+                        "minIssue": "2"
+                  },
+                  {
+                        "no": 9,
+                        "name": "หน่อไม้ทะเล",
+                        "brand": "ตรา Ocean Blue",
+                        "unit": "กระป๋อง",
+                        "minRemain": "2",
+                        "minIssue": "2"
+                  }
+            ]
+      },
+      "packaging": {
+            "label": "บรรจุภัณฑ์",
+            "icon": "📦",
+            "items": [
+                  {
+                        "no": 1,
+                        "name": "ถุงร้อน 3x5",
+                        "brand": "ตราจระเข้",
+                        "unit": "แพ็ค",
+                        "minRemain": "6",
+                        "minIssue": "6"
+                  },
+                  {
+                        "no": 2,
+                        "name": "ถุงร้อน 4x6",
+                        "brand": "ตราจระเข้",
+                        "unit": "แพ็ค",
+                        "minRemain": "6",
+                        "minIssue": "6"
+                  },
+                  {
+                        "no": 3,
+                        "name": "ถุงร้อน 5x8",
+                        "brand": "ตราจระเข้",
+                        "unit": "แพ็ค",
+                        "minRemain": "6",
+                        "minIssue": "6"
+                  },
+                  {
+                        "no": 4,
+                        "name": "ถุงร้อน 6x9",
+                        "brand": "ตราฟักทอง",
+                        "unit": "แพ็ค",
+                        "minRemain": "6",
+                        "minIssue": "6"
+                  },
+                  {
+                        "no": 5,
+                        "name": "ถุงร้อน 8x12",
+                        "brand": "ARO",
+                        "unit": "แพ็ค",
+                        "minRemain": "6",
+                        "minIssue": "6"
+                  },
+                  {
+                        "no": 6,
+                        "name": "ถุงร้อน 9x14",
+                        "brand": "ตราแอลเอส",
+                        "unit": "แพ็ค",
+                        "minRemain": "6",
+                        "minIssue": "6"
+                  },
+                  {
+                        "no": 7,
+                        "name": "ถุงเย็น PE 6x9",
+                        "brand": "INNOPLUS",
+                        "unit": "แพ็ค",
+                        "minRemain": "6",
+                        "minIssue": "6"
+                  },
+                  {
+                        "no": 8,
+                        "name": "ถุงเย็น PE 5x8",
+                        "brand": "INNOPLUS",
+                        "unit": "แพ็ค",
+                        "minRemain": "6",
+                        "minIssue": "6"
+                  },
+                  {
+                        "no": 9,
+                        "name": "ถุงเย็น PE 4x6",
+                        "brand": "INNOPLUS",
+                        "unit": "แพ็ค",
+                        "minRemain": "6",
+                        "minIssue": "6"
+                  },
+                  {
+                        "no": 10,
+                        "name": "ถุงหิ้วไม่มีโลโก้ 6x14",
+                        "brand": "INNOPLUS",
+                        "unit": "แพ็ค",
+                        "minRemain": "6",
+                        "minIssue": "6"
+                  },
+                  {
+                        "no": 11,
+                        "name": "ถุงหิ้วไม่มีโลโก้ 9x18",
+                        "brand": "ตราเบ็นซ์จรวด",
+                        "unit": "แพ็ค",
+                        "minRemain": "6",
+                        "minIssue": "6"
+                  },
+                  {
+                        "no": 12,
+                        "name": "ถุงหิ้วไม่มีโลโก้ 12x20",
+                        "brand": "ตรากล้วยไม้",
+                        "unit": "แพ็ค",
+                        "minRemain": "6",
+                        "minIssue": "6"
+                  },
+                  {
+                        "no": 13,
+                        "name": "ถุงหิ้วมีโลโก้ 9x18",
+                        "brand": "-",
+                        "unit": "แพ็ค",
+                        "minRemain": "6",
+                        "minIssue": "6"
+                  },
+                  {
+                        "no": 14,
+                        "name": "ถุงหิ้วมีโลโก้ 12x20",
+                        "brand": "-",
+                        "unit": "แพ็ค",
+                        "minRemain": "6",
+                        "minIssue": "6"
+                  },
+                  {
+                        "no": 15,
+                        "name": "กล่องอาหารใส 750 ml",
+                        "brand": "ร้านวันชาติ",
+                        "unit": "ชิ้น",
+                        "minRemain": "50",
+                        "minIssue": "50"
+                  },
+                  {
+                        "no": 16,
+                        "name": "กล่องอาหารใหญ่ มีโลโก้",
+                        "brand": "ร้านวันชาติ",
+                        "unit": "ชิ้น",
+                        "minRemain": "50",
+                        "minIssue": "50"
+                  },
+                  {
+                        "no": 17,
+                        "name": "กล่องใส่ปลา/ตัว",
+                        "brand": "ตรากรตะวัน",
+                        "unit": "ชิ้น",
+                        "minRemain": "5",
+                        "minIssue": "5"
+                  },
+                  {
+                        "no": 18,
+                        "name": "หนังยางวงเล็ก",
+                        "brand": "KW",
+                        "unit": "แพ็ค",
+                        "minRemain": "1",
+                        "minIssue": "1"
+                  },
+                  {
+                        "no": 19,
+                        "name": "หนังยางวงใหญ่",
+                        "brand": "-",
+                        "unit": "แพ็ค",
+                        "minRemain": "1",
+                        "minIssue": "1"
+                  },
+                  {
+                        "no": 20,
+                        "name": "ถ้วยบั่วสี",
+                        "brand": "ร้านวันชาติ",
+                        "unit": "ชิ้น",
+                        "minRemain": "50",
+                        "minIssue": "50"
+                  },
+                  {
+                        "no": 21,
+                        "name": "ขวด+ฝา น้ำจิ้มสุกี้ 360 ml",
+                        "brand": "โอวไถ่ฮง",
+                        "unit": "ขวด/ชิ้น",
+                        "minRemain": "50",
+                        "minIssue": "50"
+                  },
+                  {
+                        "no": 22,
+                        "name": "กระปุกใส+ฝา ใส่บั่วสี 360 ml",
+                        "brand": "ตั้งซุ่นฮวด",
+                        "unit": "กระปุก/ชิ้น",
+                        "minRemain": "50",
+                        "minIssue": "50"
+                  },
+                  {
+                        "no": 23,
+                        "name": "เทปรัดปากขวด น้ำจิ้มสุกี้",
+                        "brand": "-",
+                        "unit": "อัน",
+                        "minRemain": "50",
+                        "minIssue": "50"
+                  },
+                  {
+                        "no": 24,
+                        "name": "เทปรัดปากขวด บั่วสี",
+                        "brand": "-",
+                        "unit": "อัน",
+                        "minRemain": "50",
+                        "minIssue": "50"
+                  },
+                  {
+                        "no": 25,
+                        "name": "กระดาษห่อข้าว",
+                        "brand": "ตราดอกเหมย",
+                        "unit": "แพ็ค",
+                        "minRemain": "1",
+                        "minIssue": "1"
+                  },
+                  {
+                        "no": 26,
+                        "name": "ฟอยล์อลูมิเนียม",
+                        "brand": "ARO",
+                        "unit": "ม้วน",
+                        "minRemain": "2",
+                        "minIssue": "2"
+                  },
+                  {
+                        "no": 27,
+                        "name": "ที่ซีลอาหาร",
+                        "brand": "ARO",
+                        "unit": "ม้วน",
+                        "minRemain": "2",
+                        "minIssue": "2"
+                  },
+                  {
+                        "no": 28,
+                        "name": "ชุดช้อนส้อม",
+                        "brand": "ARO",
+                        "unit": "คู่",
+                        "minRemain": "24",
+                        "minIssue": "24"
+                  },
+                  {
+                        "no": 29,
+                        "name": "ตะเกียบไม้",
+                        "brand": "ARO",
+                        "unit": "คู่",
+                        "minRemain": "24",
+                        "minIssue": "24"
+                  },
+                  {
+                        "no": 30,
+                        "name": "ไม้เสียบลูกชิ้น",
+                        "brand": "ARO",
+                        "unit": "แพ็ค",
+                        "minRemain": "1",
+                        "minIssue": "1"
+                  }
+            ]
+      },
+      "cleaning_tools": {
+            "label": "อุปกรณ์ทำความสะอาด",
+            "icon": "🧼",
+            "items": [
+                  {
+                        "no": 1,
+                        "name": "แฟ๊บ",
+                        "brand": "Savepak",
+                        "unit": "กล่อง",
+                        "minRemain": "1",
+                        "minIssue": "1"
+                  },
+                  {
+                        "no": 2,
+                        "name": "กระดาษป๊อปอัพ",
+                        "brand": "Festa",
+                        "unit": "ห่อ",
+                        "minRemain": "50",
+                        "minIssue": "50"
+                  },
+                  {
+                        "no": 3,
+                        "name": "กระดาษทิชชู่ 300 แผ่น/ห่อ",
+                        "brand": "Acsept",
+                        "unit": "ห่อ",
+                        "minRemain": "12",
+                        "minIssue": "12"
+                  },
+                  {
+                        "no": 4,
+                        "name": "กระดาษทิชชู่ 90 แผ่น/ห่อ",
+                        "brand": "ARO",
+                        "unit": "ห่อ",
+                        "minRemain": "2",
+                        "minIssue": "2"
+                  },
+                  {
+                        "no": 5,
+                        "name": "ฟองน้ำหุ้มตาข่าย",
+                        "brand": "ตราโพลีเคลี่",
+                        "unit": "อัน",
+                        "minRemain": "6",
+                        "minIssue": "6"
+                  },
+                  {
+                        "no": 6,
+                        "name": "สก๊อตไบรท์ แผ่นใยขัด",
+                        "brand": "Scotch Brite",
+                        "unit": "อัน",
+                        "minRemain": "6",
+                        "minIssue": "6"
+                  },
+                  {
+                        "no": 7,
+                        "name": "สก๊อตไบรท์ ฟองน้ำเหลือง",
+                        "brand": "Scotch Brite",
+                        "unit": "อัน",
+                        "minRemain": "6",
+                        "minIssue": "6"
+                  },
+                  {
+                        "no": 8,
+                        "name": "สก๊อตไบรท์ ตาข่าย",
+                        "brand": "Scotch Brite",
+                        "unit": "อัน",
+                        "minRemain": "6",
+                        "minIssue": "6"
+                  },
+                  {
+                        "no": 9,
+                        "name": "สก๊อตไบรท์ ฝอยขัดหม้อ",
+                        "brand": "Scotch Brite",
+                        "unit": "อัน",
+                        "minRemain": "6",
+                        "minIssue": "6"
+                  },
+                  {
+                        "no": 10,
+                        "name": "น้ำยาล้างจาน",
+                        "brand": "Savepak",
+                        "unit": "ถุง",
+                        "minRemain": "6",
+                        "minIssue": "6"
+                  },
+                  {
+                        "no": 11,
+                        "name": "ถุงมือส้ม size L",
+                        "brand": "SPK",
+                        "unit": "คู่",
+                        "minRemain": "6",
+                        "minIssue": "6"
+                  },
+                  {
+                        "no": 12,
+                        "name": "ถุงมือยาง แบบบาง",
+                        "brand": "ตราเสือโคร่ง",
+                        "unit": "คู่",
+                        "minRemain": "5",
+                        "minIssue": "5"
+                  },
+                  {
+                        "no": 13,
+                        "name": "น้ำยาเช็ดกระจก",
+                        "brand": "ARO",
+                        "unit": "แกลลอน",
+                        "minRemain": "1",
+                        "minIssue": "1"
+                  },
+                  {
+                        "no": 14,
+                        "name": "น้ำยาทำความสะอาดพื้น",
+                        "brand": "ARO",
+                        "unit": "แกลลอน",
+                        "minRemain": "1",
+                        "minIssue": "1"
+                  },
+                  {
+                        "no": 15,
+                        "name": "น้ำยาทำความสะอาด",
+                        "brand": "Spa Clean",
+                        "unit": "แกลลอน",
+                        "minRemain": "1",
+                        "minIssue": "1"
+                  },
+                  {
+                        "no": 16,
+                        "name": "ถุงขยะดำ 18x20",
+                        "brand": "Winner Power Clean",
+                        "unit": "แพ็ค",
+                        "minRemain": "1",
+                        "minIssue": "1"
+                  },
+                  {
+                        "no": 17,
+                        "name": "ถุงขยะดำ 24x28",
+                        "brand": "Winner Power Clean",
+                        "unit": "แพ็ค",
+                        "minRemain": "1",
+                        "minIssue": "1"
+                  },
+                  {
+                        "no": 18,
+                        "name": "ถุงขยะดำ 30x40",
+                        "brand": "Winner Power Clean",
+                        "unit": "แพ็ค",
+                        "minRemain": "1",
+                        "minIssue": "1"
+                  }
+            ]
+      },
+      "others": {
+            "label": "อื่นๆ",
+            "icon": "📝",
+            "items": [
+                  {
+                        "no": 1,
+                        "name": "กระดาษปริ้นออเดอร์",
+                        "brand": "-",
+                        "unit": "ม้วน",
+                        "minRemain": "12",
+                        "minIssue": "12"
+                  },
+                  {
+                        "no": 2,
+                        "name": "สติ๊กเกอร์ปริ้นวันที่",
+                        "brand": "Niimbot",
+                        "unit": "ม้วน",
+                        "minRemain": "3",
+                        "minIssue": "3"
+                  },
+                  {
+                        "no": 3,
+                        "name": "สก๊อตเทปใส เล็ก",
+                        "brand": "-",
+                        "unit": "ม้วน",
+                        "minRemain": "3",
+                        "minIssue": "3"
+                  },
+                  {
+                        "no": 4,
+                        "name": "สก๊อตเทปใส ใหญ่",
+                        "brand": "-",
+                        "unit": "ม้วน",
+                        "minRemain": "3",
+                        "minIssue": "3"
+                  },
+                  {
+                        "no": 5,
+                        "name": "เทปย่น",
+                        "brand": "-",
+                        "unit": "ม้วน",
+                        "minRemain": "2",
+                        "minIssue": "2"
+                  },
+                  {
+                        "no": 6,
+                        "name": "ไวท์บอร์ด",
+                        "brand": "-",
+                        "unit": "อัน",
+                        "minRemain": "1",
+                        "minIssue": "1"
+                  },
+                  {
+                        "no": 7,
+                        "name": "แปรงลบกระดาน",
+                        "brand": "-",
+                        "unit": "อัน",
+                        "minRemain": "1",
+                        "minIssue": "1"
+                  }
+            ]
+      }
 },
     "issueGroups": {
       "front": {
@@ -6873,10 +6878,17 @@ const stockData = {
 let currentCategory = "";
 let currentSubMain = "";
 let currentSubCategory = "";
+let currentIssueDestination = "";
 let employee = "";
 let currentAction = "count";
 let weeklyUsageMap = {};
 let weeklyUsageMeta = {};
+
+const ISSUE_DESTINATIONS = {
+  front: { label: "หน้าร้าน", icon: "🍽️", bg: "bg-orange-500" },
+  kitchen: { label: "ในครัว", icon: "🍳", bg: "bg-emerald-600" },
+  bar: { label: "บาร์น้ำ", icon: "🥤", bg: "bg-sky-600" }
+};
 
 function escapeHtml(str){
   return String(str ?? "")
@@ -6905,8 +6917,8 @@ function getCurrentCategoryLabel(){
 }
 
 function getCurrentSubMainLabel(){
-  if(currentCategory==="stock"){
-    return stockData.stock.issueGroups[currentSubMain]?.label || "";
+  if(currentAction==="issue" && currentCategory==="stock"){
+    return ISSUE_DESTINATIONS[currentIssueDestination]?.label || "";
   }
   return "";
 }
@@ -6914,9 +6926,6 @@ function getCurrentSubMainLabel(){
 function getCurrentSubcategoryConfig(){
   if(!currentCategory) return null;
   if(currentCategory==="stock"){
-    if(currentAction==="issue"){
-      return stockData.stock.issueGroups[currentSubMain]?.subcategories?.[currentSubCategory] || null;
-    }
     return stockData.stock.subcategories?.[currentSubCategory] || null;
   }
   return stockData[currentCategory]?.subcategories?.[currentSubCategory] || null;
@@ -6937,7 +6946,7 @@ function buildItemKey(targetCategoryLabel, subCategoryLabel, item){
 
 function getWeeklyUsageValue(item){
   if(!(currentCategory==="stock" && currentAction==="count")) return 0;
-  const key = buildItemKey(getCurrentSubMainLabel(), getCurrentSubcategoryConfig()?.label || "", item);
+  const key = buildItemKey(getCurrentCategoryLabel(), getCurrentSubcategoryConfig()?.label || "", item);
   return Number(weeklyUsageMap[key] || 0);
 }
 
@@ -6963,7 +6972,7 @@ function getDisplayPath(){
   const parts = [getCurrentCategoryLabel()];
   const subMainLabel = getCurrentSubMainLabel();
   const subcatLabel = getCurrentSubcategoryConfig()?.label;
-  if(subMainLabel) parts.push(subMainLabel);
+  if(subMainLabel) parts.push("ไป" + subMainLabel);
   if(subcatLabel) parts.push(subcatLabel);
   return parts.filter(Boolean).join(" • ");
 }
@@ -7114,6 +7123,7 @@ function openCategory(cat){
   currentCategory = cat;
   currentSubMain = "";
   currentSubCategory = "";
+  currentIssueDestination = "";
 
   if(currentAction==="issue" && currentCategory!=="stock"){
     alert("โหมดเบิกของ: กรุณาเข้า “ห้องสต๊อก” ก่อนค่ะ");
@@ -7121,15 +7131,9 @@ function openCategory(cat){
   }
 
   if(currentCategory==="stock"){
-    if(currentAction==="issue"){
-      document.getElementById("submain-title").innerText = "หมวด: ห้องสต๊อก";
-      renderSubMainList();
-      showPage("submain-page");
-    } else {
-      document.getElementById("subcategory-title").innerText = "หมวด: ห้องสต๊อก";
-      renderSubcategoryList();
-      showPage("subcategory-page");
-    }
+    document.getElementById("subcategory-title").innerText = "หมวด: ห้องสต๊อก";
+    renderSubcategoryList();
+    showPage("subcategory-page");
     return;
   }
 
@@ -7152,9 +7156,7 @@ function renderSubcategoryList(){
   const list = document.getElementById("subcategory-list");
   let source = null;
   if(currentCategory==="stock"){
-    source = currentAction==="issue"
-      ? (stockData.stock.issueGroups[currentSubMain]?.subcategories || {})
-      : (stockData.stock.subcategories || {});
+    source = stockData.stock.subcategories || {};
   } else {
     source = stockData[currentCategory]?.subcategories || {};
   }
@@ -7171,6 +7173,7 @@ async function openItems(){
   document.getElementById("category-title").innerText = getDisplayPath();
   await loadWeeklyUsageMap();
   renderItems();
+  renderIssueDestinationButtons();
   showPage("category-page");
 }
 
@@ -7206,6 +7209,40 @@ function changeQty(id, minValue, delta){
   const next = Math.max(0, cur + delta);
   el.value = next;
   onQtyInput(id, minValue);
+}
+
+
+function renderIssueDestinationButtons(){
+  const wrap = document.getElementById("issue-destination-wrap");
+  const list = document.getElementById("issue-destination-buttons");
+  if(!wrap || !list) return;
+
+  const shouldShow = currentAction==="issue" && currentCategory==="stock";
+  wrap.classList.toggle("hidden", !shouldShow);
+
+  if(!shouldShow){
+    list.innerHTML = "";
+    return;
+  }
+
+  list.innerHTML = Object.entries(ISSUE_DESTINATIONS).map(([key, conf]) => {
+    const active = currentIssueDestination===key;
+    return `
+      <button type="button"
+        class="${active ? conf.bg + ' text-white ring-2 ring-offset-2 ring-gray-300' : 'bg-white border text-gray-800'} rounded-2xl px-3 py-3 text-sm font-semibold shadow-sm active:scale-[0.98] transition"
+        data-destination="${key}">
+        ${conf.icon} ${conf.label}
+      </button>
+    `;
+  }).join("");
+
+  list.querySelectorAll("[data-destination]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      currentIssueDestination = btn.dataset.destination || "";
+      renderIssueDestinationButtons();
+      document.getElementById("category-title").innerText = getDisplayPath();
+    });
+  });
 }
 
 function renderItems(){
@@ -7285,8 +7322,8 @@ function getFromCategoryName(){
 }
 
 function getToCategoryName(){
-  if(currentAction==="issue"){
-    return getCurrentSubMainLabel();
+  if(currentAction==="issue" && currentCategory==="stock"){
+    return ISSUE_DESTINATIONS[currentIssueDestination]?.label || "";
   }
   return "";
 }
@@ -7298,6 +7335,11 @@ async function saveRecords(){
     const thresholdLabel = getThresholdLabel();
     const today = new Date().toISOString();
 
+    if(currentAction==="issue" && currentCategory==="stock" && !currentIssueDestination){
+      alert("กรุณาเลือกปลายทางการเบิกของก่อนบันทึก");
+      return;
+    }
+
     const records = items.map((it, i) => {
       const id = buildItemId(i);
       const qty = String(getSavedQty(id) ?? 0);
@@ -7307,9 +7349,9 @@ async function saveRecords(){
         employee,
         action: currentAction,
         category: currentAction==="issue" ? "ห้องสต๊อก" : getCurrentCategoryLabel(),
-        mainCategory: currentAction==="issue" ? getCurrentSubMainLabel() : getCurrentCategoryLabel(),
+        mainCategory: getCurrentCategoryLabel(),
         subCategory: getCurrentSubcategoryConfig()?.label || "",
-        itemKey: buildItemKey(currentAction==="issue" ? getCurrentSubMainLabel() : getCurrentCategoryLabel(), getCurrentSubcategoryConfig()?.label || "", it),
+        itemKey: buildItemKey(getCurrentCategoryLabel(), getCurrentSubcategoryConfig()?.label || "", it),
         item: displayName,
         itemName: it.name,
         brand: it.brand,
