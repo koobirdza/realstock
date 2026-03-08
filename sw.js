@@ -1,4 +1,4 @@
-const VERSION = "v24.2-stock";
+const VERSION = "v25.0-github-hotfix";
 const STATIC_CACHE = `realstock-static-${VERSION}`;
 
 self.addEventListener("install", (event) => {
@@ -31,7 +31,7 @@ self.addEventListener("fetch", (event) => {
 
   const accept = req.headers.get("accept") || "";
   const isDocument = req.mode === "navigate" || accept.includes("text/html");
-  const isStaticAsset = ["script", "style", "image", "font"].includes(req.destination);
+  const isStaticAsset = ["script", "style", "image", "font", "manifest"].includes(req.destination);
 
   event.respondWith((async () => {
     const cache = await caches.open(STATIC_CACHE);
@@ -44,7 +44,7 @@ self.addEventListener("fetch", (event) => {
         cache.put(req, fresh.clone());
         return fresh;
       } catch (error) {
-        const cached = await cache.match(req) || await cache.match("./index.html");
+        const cached = await cache.match(req) || await cache.match("./index.html") || await cache.match("/index.html");
         if (cached) return cached;
         throw error;
       }
@@ -53,7 +53,7 @@ self.addEventListener("fetch", (event) => {
     if (isStaticAsset) {
       const cached = await cache.match(req);
       const networkPromise = fetch(req, { cache: "no-store" }).then((res) => {
-        cache.put(req, res.clone());
+        if (res && res.ok) cache.put(req, res.clone());
         return res;
       }).catch(() => null);
       return cached || networkPromise || fetch(req);

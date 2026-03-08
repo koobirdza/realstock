@@ -1,9 +1,9 @@
 {
-  "name": "เจริญไทยสุกี้ • ระบบเช็คสต๊อคพนักงาน",
+  "name": "Charoen Thai Suki Stock Worker",
   "short_name": "Stock Worker",
-  "start_url": "./",
+  "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#ffffff",
+  "background_color": "#fff7ed",
   "theme_color": "#f97316",
   "icons": [
     {
