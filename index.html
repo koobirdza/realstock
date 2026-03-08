@@ -117,22 +117,23 @@
       </div>
     </div>
 
-    <div id="lowCountBadge" class="text-sm text-red-600 font-semibold mb-2"></div>
-    <div id="item-list"></div>
-    <div id="issue-destination-wrap" class="hidden mt-4">
+    <div id="issue-destination-wrap" class="hidden mb-4">
       <div class="text-sm font-semibold text-gray-700 mb-2">ปลายทางการเบิกของ</div>
-      <div id="issue-destination-buttons" class="grid grid-cols-3 gap-2"></div>
+      <div id="issue-destination-buttons" class="grid grid-cols-1 sm:grid-cols-3 gap-2"></div>
       <div id="issue-destination-note" class="text-xs text-gray-500 mt-2">เลือกว่าจะเบิกของไปที่ไหนก่อนกดบันทึก</div>
     </div>
 
-    <div class="pos-footer mt-4 flex gap-2 flex-wrap>
-      <button id="saveBtn" class="bg-emerald-600 text-white px-6 py-3 rounded-2xl shadow text-lg">💾 บันทึก</button>
-      <button id="clearBtn" class="bg-gray-200 text-gray-800 px-6 py-3 rounded-2xl shadow text-lg">ล้างค่า</button>
+    <div id="lowCountBadge" class="text-sm text-red-600 font-semibold mb-2"></div>
+    <div id="item-list"></div>
+
+    <div class="pos-footer mt-4 flex gap-2 flex-wrap">
+      <button id="saveBtn" class="bg-emerald-600 text-white px-6 py-3 rounded-2xl shadow text-lg border border-emerald-700">💾 บันทึก</button>
+      <button id="clearBtn" class="bg-gray-200 text-gray-800 px-6 py-3 rounded-2xl shadow text-lg border border-gray-300">ล้างค่า</button>
       <span id="savingHint" class="hidden text-sm text-gray-600 self-center">กำลังบันทึก…</span>
     </div>
   </div>
 <script>
-const VERSION = "v24-stock";
+const VERSION = "v24.1-stock";
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwSOEIId8C7BVTxCYwiJoSG7N7k4OSy1TfZXJyDHSD2AWSJ7NWGboHYIqMtqbqP2ISn4Q/exec";
 const stockData = {
   "front": {
@@ -7098,11 +7099,7 @@ function goHome(){
 function backFromSubMain(){ goHome(); }
 
 function backFromSubcategory(){
-  if(currentCategory==="stock" && currentAction==="issue"){
-    showPage("submain-page");
-  } else {
-    showPage("home-page");
-  }
+  goHome();
 }
 
 function backFromItems(){
@@ -7215,6 +7212,7 @@ function changeQty(id, minValue, delta){
 function renderIssueDestinationButtons(){
   const wrap = document.getElementById("issue-destination-wrap");
   const list = document.getElementById("issue-destination-buttons");
+  const note = document.getElementById("issue-destination-note");
   if(!wrap || !list) return;
 
   const shouldShow = currentAction==="issue" && currentCategory==="stock";
@@ -7222,19 +7220,42 @@ function renderIssueDestinationButtons(){
 
   if(!shouldShow){
     list.innerHTML = "";
+    if(note) note.textContent = "";
     return;
   }
 
+  const styleMap = {
+    front: {
+      active: "bg-orange-500 text-white ring-2 ring-offset-2 ring-orange-200 border border-orange-600",
+      inactive: "bg-orange-50 text-orange-700 border border-orange-200"
+    },
+    kitchen: {
+      active: "bg-emerald-600 text-white ring-2 ring-offset-2 ring-emerald-200 border border-emerald-700",
+      inactive: "bg-emerald-50 text-emerald-700 border border-emerald-200"
+    },
+    bar: {
+      active: "bg-sky-600 text-white ring-2 ring-offset-2 ring-sky-200 border border-sky-700",
+      inactive: "bg-sky-50 text-sky-700 border border-sky-200"
+    }
+  };
+
   list.innerHTML = Object.entries(ISSUE_DESTINATIONS).map(([key, conf]) => {
     const active = currentIssueDestination===key;
+    const styles = styleMap[key] || { active: "bg-blue-600 text-white border border-blue-700", inactive: "bg-white text-gray-800 border" };
     return `
       <button type="button"
-        class="${active ? conf.bg + ' text-white ring-2 ring-offset-2 ring-gray-300' : 'bg-white border text-gray-800'} rounded-2xl px-3 py-3 text-sm font-semibold shadow-sm active:scale-[0.98] transition"
+        class="${active ? styles.active : styles.inactive} rounded-2xl px-3 py-3 text-sm font-semibold shadow-sm active:scale-[0.98] transition"
         data-destination="${key}">
         ${conf.icon} ${conf.label}
       </button>
     `;
   }).join("");
+
+  if(note){
+    note.textContent = currentIssueDestination
+      ? `กำลังบันทึกการเบิกไปที่ “${ISSUE_DESTINATIONS[currentIssueDestination]?.label || ""}”`
+      : "เลือกว่าจะเบิกของไปที่ไหนก่อนกดบันทึก";
+  }
 
   list.querySelectorAll("[data-destination]").forEach(btn => {
     btn.addEventListener("click", () => {

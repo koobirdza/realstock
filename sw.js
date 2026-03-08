@@ -1,4 +1,4 @@
-const VERSION = "v23-stable";
+const VERSION = "v24.1-stock";
 const STATIC_CACHE = `realstock-static-${VERSION}`;
 
 self.addEventListener("install", (event) => {
