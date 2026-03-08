@@ -133,7 +133,7 @@
     </div>
   </div>
 <script>
-const VERSION = "v24.1-stock";
+const VERSION = "v24.2-stock";
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwSOEIId8C7BVTxCYwiJoSG7N7k4OSy1TfZXJyDHSD2AWSJ7NWGboHYIqMtqbqP2ISn4Q/exec";
 const stockData = {
   "front": {
@@ -6941,29 +6941,6 @@ function getThresholdField(){
   return "minIssue";
 }
 
-function buildItemKey(targetCategoryLabel, subCategoryLabel, item){
-  return [targetCategoryLabel || "", subCategoryLabel || "", item?.name || "", item?.brand || "", item?.unit || ""].join("|").trim().toLowerCase();
-}
-
-function getWeeklyUsageValue(item){
-  if(!(currentCategory==="stock" && currentAction==="count")) return 0;
-  const key = buildItemKey(getCurrentCategoryLabel(), getCurrentSubcategoryConfig()?.label || "", item);
-  return Number(weeklyUsageMap[key] || 0);
-}
-
-async function loadWeeklyUsageMap(){
-  if(!(currentCategory==="stock" && currentAction==="count")){ weeklyUsageMap = {}; weeklyUsageMeta = {}; return; }
-  try{
-    const res = await fetch(GOOGLE_SCRIPT_URL + "?action=getWeeklyUsage&v=" + encodeURIComponent(VERSION), { cache:"no-store" });
-    const data = await res.json();
-    weeklyUsageMap = data?.map || {};
-    weeklyUsageMeta = data?.meta || {};
-  }catch(err){
-    console.error("weekly usage load failed", err);
-    weeklyUsageMap = {};
-    weeklyUsageMeta = {};
-  }
-}
 
 function getThresholdLabel(){
   return "ขั้นต่ำ";
@@ -7168,7 +7145,6 @@ function renderSubcategoryList(){
 
 async function openItems(){
   document.getElementById("category-title").innerText = getDisplayPath();
-  await loadWeeklyUsageMap();
   renderItems();
   renderIssueDestinationButtons();
   showPage("category-page");
@@ -7287,10 +7263,6 @@ function renderItems(){
             <div class="mt-1">${escapeHtml(thresholdLabel)}: <b>${escapeHtml(it[thresholdField])}</b></div>
           </div>
           ${isStorageCountMode ? `
-            <div class="text-sm text-gray-700 leading-snug min-w-[56px] text-center">
-              <div class="opacity-70">เบิกสัปดาห์ล่าสุด</div>
-              <div class="text-xl font-extrabold text-gray-900">${getWeeklyUsageValue(it)}</div>
-            </div>
             <div class="flex-1 flex justify-end">
               <input type="number" inputmode="numeric" id="qty-${id}"
                 class="border rounded-2xl px-2 py-3 text-center w-24 sm:w-28 text-lg font-semibold"
