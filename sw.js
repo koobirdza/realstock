@@ -1,4 +1,4 @@
-const VERSION = "v22-worker";
+const VERSION = "v23-worker";
 const STATIC_CACHE = `realstock-static-${VERSION}`;
 const APP_SHELL = ["./", "./index.html", "./manifest.json"];
 
