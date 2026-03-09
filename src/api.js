@@ -2,9 +2,7 @@ import { GOOGLE_SCRIPT_URL } from "./config.js";
 import { createRequestId } from "./utils.js";
 
 export async function pingServer() {
-  if (!GOOGLE_SCRIPT_URL) {
-    return { ok: false, message: "ยังไม่ได้ตั้งค่า GOOGLE_SCRIPT_URL" };
-  }
+  if (!GOOGLE_SCRIPT_URL) return { ok: false, message: "ยังไม่ได้ตั้งค่า GOOGLE_SCRIPT_URL" };
   try {
     const res = await fetch(`${GOOGLE_SCRIPT_URL}?action=ping&_=${Date.now()}`, { method: "GET", cache: "no-store" });
     return await res.json();
@@ -13,22 +11,29 @@ export async function pingServer() {
   }
 }
 
-export async function refreshWeeklyUsage() {
-  if (!GOOGLE_SCRIPT_URL) throw new Error("ยังไม่ได้ตั้งค่า GOOGLE_SCRIPT_URL");
-  const res = await fetch(`${GOOGLE_SCRIPT_URL}?action=refreshWeekly&_=${Date.now()}`, { method: "GET", cache: "no-store" });
+async function getJson(action) {
+  const res = await fetch(`${GOOGLE_SCRIPT_URL}?action=${action}&_=${Date.now()}`, { method: "GET", cache: "no-store" });
   return await res.json();
 }
 
-export async function exportDebugLog() {
-  if (!GOOGLE_SCRIPT_URL) throw new Error("ยังไม่ได้ตั้งค่า GOOGLE_SCRIPT_URL");
-  const res = await fetch(`${GOOGLE_SCRIPT_URL}?action=exportDebug&_=${Date.now()}`, { method: "GET", cache: "no-store" });
+export const refreshWeeklyUsage = () => getJson("refreshWeekly");
+export const exportDebugLog = () => getJson("exportDebug");
+export const getCurrentStockSummary = () => getJson("currentStock");
+export const getDailyReport = () => getJson("dailyReport");
+
+export async function testLineOA() {
+  const res = await fetch(`${GOOGLE_SCRIPT_URL}?action=testLineOA&_=${Date.now()}`, { method: "GET", cache: "no-store" });
+  return await res.json();
+}
+
+export async function exportLineTargets() {
+  const res = await fetch(`${GOOGLE_SCRIPT_URL}?action=exportLineTargets&_=${Date.now()}`, { method: "GET", cache: "no-store" });
   return await res.json();
 }
 
 export async function submitRecords(records, timeoutMs = 12000) {
   if (!GOOGLE_SCRIPT_URL) throw new Error("ยังไม่ได้ตั้งค่า GOOGLE_SCRIPT_URL");
   const requestId = createRequestId();
-
   return await new Promise((resolve, reject) => {
     const iframeName = `submit_iframe_${requestId}`;
     const iframe = document.createElement("iframe");

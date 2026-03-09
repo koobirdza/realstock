@@ -52,3 +52,10 @@ export function getSubCategory(path = []) {
 export function needsDestination(mode, path = []) {
   return mode === "issue" && getTopCategoryKey(path) === "stock";
 }
+
+export function getModeMeta(mode) {
+  if (mode === "count") return { label: "🟢 นับสต๊อก", color: "green" };
+  if (mode === "issue") return { label: "🔵 เบิกของ", color: "blue" };
+  if (mode === "receive") return { label: "🟠 รับของเข้า", color: "orange" };
+  return { label: "ยังไม่ได้เลือกโหมด", color: "slate" };
+}

@@ -1,9 +1,8 @@
 export const state = {
   employee: null,
-  mode: null,          // "count" | "issue"
-  path: [],            // ["stock", "dry_goods", "sauces"] etc
-  destination: "",
-  pendingSave: false
+  mode: null,
+  path: [],
+  destination: ""
 };
 
 export function resetNavigation() {
