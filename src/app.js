@@ -9,6 +9,7 @@ import { pingServer, submitRecords, refreshWeeklyUsage, exportDebugLog, getCurre
 import { debounce } from "./utils.js";
 
 let currentStockSummary = {};
+let saveInFlight = false;
 
 function bootCheck() {
   bindDom();
@@ -193,8 +194,18 @@ function restoreDraftIntoForm() {
 }
 
 async function handleSave() {
+  if (saveInFlight) {
+    toast("กำลังบันทึกอยู่ กรุณารอสักครู่", "warn", 2500);
+    return;
+  }
+  saveInFlight = true;
   try {
     clearInlineError();
+    const saveBtn = document.getElementById("saveBtn");
+    if (saveBtn) {
+      saveBtn.disabled = true;
+      saveBtn.classList.add("opacity-60","cursor-not-allowed");
+    }
     const inputRows = [...document.querySelectorAll("[data-qty-index]")].map((el) => ({ index: Number(el.dataset.qtyIndex), value: el.value }));
     const records = collectRecords(inputRows);
     saveDraft([{ meta: { employee: state.employee, mode: state.mode, path: [...state.path], destination: state.destination }, records }]);
@@ -214,6 +225,13 @@ async function handleSave() {
     const msg = err?.message || "เกิดข้อผิดพลาดระหว่างบันทึก";
     showInlineError(msg);
     toast(msg, "error", 4500);
+  } finally {
+    saveInFlight = false;
+    const saveBtn = document.getElementById("saveBtn");
+    if (saveBtn) {
+      saveBtn.disabled = false;
+      saveBtn.classList.remove("opacity-60","cursor-not-allowed");
+    }
   }
 }
 

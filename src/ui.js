@@ -92,6 +92,7 @@ export function renderDestinationPicker(onPick) {
   els.destinationButtons.querySelectorAll("[data-dest]").forEach((btn) => btn.addEventListener("click", () => onPick(btn.dataset.dest)));
 }
 
+
 export function renderNavigation(node, handlers, stockSummary = {}) {
   els.breadcrumb.textContent = getPathLabels(state.path).join(" › ");
   renderDestinationPicker(handlers.onPickDestination);
@@ -99,21 +100,47 @@ export function renderNavigation(node, handlers, stockSummary = {}) {
   const children = getChildren(node);
   const items = getItems(node);
 
+  const modeSurfaceClass = state.mode === "count"
+    ? "mode-surface-green"
+    : state.mode === "issue"
+    ? "mode-surface-blue"
+    : state.mode === "receive"
+    ? "mode-surface-orange"
+    : "mode-surface-default";
+
+  const navRoot = els.nodeList.closest(".card");
+  if (navRoot) {
+    navRoot.classList.remove("mode-surface-green", "mode-surface-blue", "mode-surface-orange", "mode-surface-default");
+    navRoot.classList.add(modeSurfaceClass);
+  }
+
   if (children.length) {
     els.nodeList.classList.remove("hidden");
     els.itemPanel.classList.add("hidden");
-    els.nodeList.innerHTML = children.map((child) => `
-      <button data-node="${escapeHtml(child.key)}" class="text-left bg-white border border-slate-200 rounded-2xl p-4 hover:border-orange-400 hover:shadow transition">
-        <div class="text-xl mb-1">${escapeHtml(child.icon || "📦")}</div>
-        <div class="font-semibold">${escapeHtml(child.label || child.key)}</div>
-      </button>
-    `).join("");
-    els.nodeList.querySelectorAll("[data-node]").forEach((btn) => btn.addEventListener("click", () => handlers.onOpenChild(btn.dataset.node)));
+    els.nodeList.innerHTML = children.map((child) => {
+      const extraClass =
+        child.key === "front" ? "node-front" :
+        child.key === "kitchen" ? "node-kitchen" :
+        child.key === "bar" ? "node-bar" :
+        child.key === "stock" ? "node-stock" : "bg-white";
+
+      return `
+        <button data-node="${escapeHtml(child.key)}" class="text-left border border-slate-200 rounded-2xl p-4 hover:border-orange-400 hover:shadow transition ${extraClass}">
+          <div class="text-xl mb-1">${escapeHtml(child.icon || "📦")}</div>
+          <div class="font-semibold">${escapeHtml(child.label || child.key)}</div>
+        </button>
+      `;
+    }).join("");
+
+    els.nodeList.querySelectorAll("[data-node]").forEach((btn) => {
+      btn.addEventListener("click", () => handlers.onOpenChild(btn.dataset.node));
+    });
     return;
   }
 
   els.nodeList.classList.add("hidden");
   els.itemPanel.classList.remove("hidden");
+
   if (!items.length) {
     els.itemPanel.innerHTML = `<div class="rounded-2xl border border-dashed border-slate-300 p-6 text-slate-500">ไม่พบรายการสินค้าในหมวดนี้</div>`;
     return;
@@ -126,15 +153,15 @@ export function renderNavigation(node, handlers, stockSummary = {}) {
   els.itemPanel.innerHTML = `
     <div class="space-y-3">
       ${items.map((item, idx) => {
-        const stock = stockSummary[item.name];
-        const stockLine = stock !== undefined && stock !== null && stock !== "" ? `คงเหลือ ${escapeHtml(stock)}` : `คงเหลือ -`;
+        const stock = stockSummary[item.name] ?? "";
+        const stockLine = stock !== "" ? `คงเหลือ ${escapeHtml(stock)}` : `คงเหลือ -`;
         const minValue = state.mode === "issue" ? (item.minIssue || "-") : (item.minRemain || "-");
         const minText = `ขั้นต่ำ ${escapeHtml(minValue)}`;
-        const lowBadge = (stock !== undefined && stock !== null && stock !== "" && Number(stock) <= Number(item.minRemain || item.minIssue || 0))
+        const lowBadge = (stock !== "" && Number(stock) <= Number(item.minRemain || item.minIssue || 0))
           ? '<span class="inline-block mt-2 text-xs px-2 py-1 rounded-full bg-red-100 text-red-700">ใกล้หมด</span>'
           : '';
         return `
-          <div class="rounded-2xl border border-slate-200 p-4 bg-white">
+          <div class="rounded-2xl border border-slate-200 p-4 bg-white/80">
             <div class="flex items-start justify-between gap-3 flex-wrap">
               <div class="min-w-[220px] flex-1">
                 <div class="font-semibold">${idx + 1}. ${escapeHtml(item.name)}</div>
@@ -144,19 +171,31 @@ export function renderNavigation(node, handlers, stockSummary = {}) {
                 ${lowBadge}
               </div>
               <div class="w-full sm:w-48">
-                <input data-qty-index="${idx}" type="number" min="0" step="any" inputmode="decimal" class="w-full border rounded-2xl px-4 py-3" placeholder="${inputHint}" />
+                <input
+                  data-qty-index="${idx}"
+                  type="number"
+                  min="0"
+                  step="any"
+                  inputmode="decimal"
+                  class="w-full border rounded-2xl px-4 py-3 bg-white"
+                  placeholder="${inputHint}"
+                />
               </div>
             </div>
-          </div>`;
+          </div>
+        `;
       }).join("")}
     </div>
-    <div class="sticky-bottom mt-4 border border-slate-200 rounded-2xl p-3 flex gap-2 flex-wrap">
+
+    <div class="sticky-bottom mt-4 border border-slate-200 rounded-2xl p-3 flex gap-2 flex-wrap bg-white/85">
       <button id="saveBtn" class="px-6 py-3 rounded-2xl bg-${modeColor}-600 text-white font-semibold">${saveLabel}</button>
       <button id="clearBtn" class="px-6 py-3 rounded-2xl bg-slate-100">ล้างค่า</button>
       <button id="restoreDraftBtn" class="px-6 py-3 rounded-2xl bg-slate-100">กู้ค่าค้าง</button>
-    </div>`;
+    </div>
+  `;
 
   qs("saveBtn").addEventListener("click", handlers.onSave);
   qs("clearBtn").addEventListener("click", handlers.onClear);
   qs("restoreDraftBtn").addEventListener("click", handlers.onRestoreDraft);
 }
+
