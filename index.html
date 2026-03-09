@@ -6,10 +6,8 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <title>เจริญไทยสุกี้ • RealStock Refactor v30</title>
+  <title>เจริญไทยสุกี้ • RealStock v33</title>
   <meta name="theme-color" content="#f97316" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-title" content="RealStock" />
   <link rel="manifest" href="manifest.json" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,11 +15,8 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body{font-family:'Prompt',sans-serif}
-    .glass{backdrop-filter:blur(10px)}
     .card{border-radius:1.25rem;box-shadow:0 10px 30px rgba(0,0,0,.08)}
     .soft-bg{background:linear-gradient(135deg,#fff7ed,#fef2f2,#fefce8)}
-    .soft-green{background:linear-gradient(135deg,#dcfce7,#bbf7d0,#86efac)}
-    .soft-blue{background:linear-gradient(135deg,#dbeafe,#bfdbfe,#93c5fd)}
     .sticky-bottom{position:sticky;bottom:0;background:rgba(255,255,255,.92)}
   </style>
 </head>
@@ -30,7 +25,7 @@
     <div class="flex items-center justify-between gap-3 mb-5">
       <div>
         <h1 class="text-2xl md:text-3xl font-bold">🍲 ระบบเช็คสต๊อก • เจริญไทยสุกี้</h1>
-        <p class="text-sm text-slate-600">Production Final v32 • Health Check • Weekly Refresh • Export Debug</p>
+        <p class="text-sm text-slate-600">Inventory Plus v33 • Receive • Low Stock • Daily Report • Excel Export</p>
       </div>
       <div class="text-xs text-slate-500 text-right">
         <div id="versionLabel"></div>
@@ -63,14 +58,18 @@
         </div>
       </div>
 
-      <div id="modePanel" class="grid md:grid-cols-2 gap-4 mb-4">
-        <button id="countModeBtn" class="card soft-green p-5 text-left">
+      <div id="modePanel" class="grid md:grid-cols-3 gap-4 mb-4">
+        <button id="countModeBtn" class="card p-5 text-left text-white" style="background:linear-gradient(135deg,#16a34a,#22c55e,#86efac)">
           <div class="text-xl font-bold">🟢 นับสต๊อก</div>
-          <div class="text-sm mt-1 text-slate-700">กรอกยอดคงเหลือ ณ ตอนนั้น</div>
+          <div class="text-sm mt-1 text-white/90">กรอกยอดคงเหลือ ณ ตอนนั้น</div>
         </button>
-        <button id="issueModeBtn" class="card soft-blue p-5 text-left">
+        <button id="issueModeBtn" class="card p-5 text-left text-white" style="background:linear-gradient(135deg,#2563eb,#3b82f6,#93c5fd)">
           <div class="text-xl font-bold">🔵 เบิกของ</div>
-          <div class="text-sm mt-1 text-slate-700">กรอกจำนวนที่เบิกออกจากจุดต้นทาง</div>
+          <div class="text-sm mt-1 text-white/90">กรอกจำนวนที่เบิกออกจากจุดต้นทาง</div>
+        </button>
+        <button id="receiveModeBtn" class="card p-5 text-left text-white" style="background:linear-gradient(135deg,#ea580c,#f97316,#fdba74)">
+          <div class="text-xl font-bold">🟠 รับของเข้า</div>
+          <div class="text-sm mt-1 text-white/90">กรอกจำนวนของเข้าประจำวัน</div>
         </button>
       </div>
 
@@ -79,15 +78,20 @@
           <div class="flex gap-2 flex-wrap items-center justify-between">
             <div>
               <div class="font-semibold">เครื่องมือระบบ</div>
-              <div class="text-sm text-slate-500">ใช้ตรวจระบบและดูข้อมูล debug ได้จากหน้าเว็บ</div>
+              <div class="text-sm text-slate-500">ใช้ตรวจระบบ ดูรายงานรายวัน และ export ข้อมูลได้จากหน้าเว็บ</div>
             </div>
             <div class="flex gap-2 flex-wrap">
               <button id="healthCheckBtn" class="px-4 py-2 rounded-xl bg-slate-100">เช็กเซิร์ฟเวอร์</button>
-              <button id="refreshWeeklyBtn" class="px-4 py-2 rounded-xl bg-slate-100">รีเฟรช Weekly Usage</button>
+              <button id="refreshWeeklyBtn" class="px-4 py-2 rounded-xl bg-slate-100">รีเฟรช Weekly</button>
+              <button id="dailyReportBtn" class="px-4 py-2 rounded-xl bg-slate-100">ดูรายงานรายวัน</button>
+              <button id="exportExcelBtn" class="px-4 py-2 rounded-xl bg-slate-100">Export Excel</button>
               <button id="exportDebugBtn" class="px-4 py-2 rounded-xl bg-slate-100">Export Debug</button>
+              <button id="testLineOABtn" class="px-4 py-2 rounded-xl bg-slate-100">ทดสอบ LINE OA</button>
+              <button id="exportTargetsBtn" class="px-4 py-2 rounded-xl bg-slate-100">Export Target IDs</button>
             </div>
           </div>
         </div>
+
         <div class="card bg-white p-4 md:p-5 mb-4">
           <div class="flex items-center justify-between gap-3 flex-wrap mb-4">
             <div>
