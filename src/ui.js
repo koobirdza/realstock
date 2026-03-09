@@ -7,10 +7,10 @@ const els = {};
 
 function modeBadgeClasses(color) {
   const map = {
-    green: "bg-emerald-50 border-emerald-200 text-emerald-700",
-    blue: "bg-blue-50 border-blue-200 text-blue-700",
-    orange: "bg-orange-50 border-orange-200 text-orange-700",
-    slate: "bg-slate-100 border-slate-200 text-slate-700"
+    green: "bg-emerald-200 border-emerald-500 text-emerald-950 shadow-sm",
+    blue: "bg-blue-200 border-blue-500 text-blue-950 shadow-sm",
+    orange: "bg-orange-200 border-orange-500 text-orange-950 shadow-sm",
+    slate: "bg-slate-200 border-slate-400 text-slate-900 shadow-sm"
   };
   return map[color] || map.slate;
 }
@@ -22,7 +22,8 @@ export function bindDom() {
     "countModeBtn","issueModeBtn","receiveModeBtn","currentModeBadge",
     "navPanel","breadcrumb","homeBtn","backBtn",
     "destinationWrap","destinationButtons","nodeList","itemPanel",
-    "healthCheckBtn","refreshWeeklyBtn","dailyReportBtn","exportExcelBtn","exportDebugBtn"
+    "healthCheckBtn","refreshWeeklyBtn","dailyReportBtn","exportExcelBtn","exportDebugBtn",
+    "testLineOABtn","exportTargetsBtn"
   ].forEach((id) => {
     const found = document.getElementById(id);
     if (found) els[id] = found;
@@ -87,7 +88,7 @@ export function renderDestinationPicker(onPick) {
   }
   els.destinationButtons.innerHTML = ISSUE_DESTINATIONS.map((x) => {
     const active = state.destination === x.key;
-    return `<button data-dest="${escapeHtml(x.key)}" class="px-4 py-3 rounded-2xl border ${active ? "bg-blue-600 text-white border-blue-700" : "bg-white border-slate-200"}">${escapeHtml(x.label)}</button>`;
+    return `<button data-dest="${escapeHtml(x.key)}" class="px-4 py-3 rounded-2xl border font-semibold transition ${active ? "bg-blue-800 text-white border-blue-950 shadow-md" : "bg-slate-200 text-slate-900 border-slate-400 hover:bg-slate-300"}">${escapeHtml(x.label)}</button>`;
   }).join("");
   els.destinationButtons.querySelectorAll("[data-dest]").forEach((btn) => btn.addEventListener("click", () => onPick(btn.dataset.dest)));
 }
@@ -125,7 +126,7 @@ export function renderNavigation(node, handlers, stockSummary = {}) {
         child.key === "stock" ? "node-stock" : "bg-white";
 
       return `
-        <button data-node="${escapeHtml(child.key)}" class="text-left border border-slate-200 rounded-2xl p-4 hover:border-orange-400 hover:shadow transition ${extraClass}">
+        <button data-node="${escapeHtml(child.key)}" class="text-left border border-slate-400 rounded-2xl p-4 hover:border-orange-700 hover:shadow-lg transition ${extraClass}">
           <div class="text-xl mb-1">${escapeHtml(child.icon || "📦")}</div>
           <div class="font-semibold">${escapeHtml(child.label || child.key)}</div>
         </button>
@@ -161,7 +162,7 @@ export function renderNavigation(node, handlers, stockSummary = {}) {
           ? '<span class="inline-block mt-2 text-xs px-2 py-1 rounded-full bg-red-100 text-red-700">ใกล้หมด</span>'
           : '';
         return `
-          <div class="rounded-2xl border border-slate-200 p-4 bg-white/80">
+          <div class="rounded-2xl border border-slate-300 p-4 bg-white/95 shadow-sm">
             <div class="flex items-start justify-between gap-3 flex-wrap">
               <div class="min-w-[220px] flex-1">
                 <div class="font-semibold">${idx + 1}. ${escapeHtml(item.name)}</div>
@@ -187,10 +188,10 @@ export function renderNavigation(node, handlers, stockSummary = {}) {
       }).join("")}
     </div>
 
-    <div class="sticky-bottom mt-4 border border-slate-200 rounded-2xl p-3 flex gap-2 flex-wrap bg-white/85">
-      <button id="saveBtn" class="px-6 py-3 rounded-2xl bg-${modeColor}-600 text-white font-semibold">${saveLabel}</button>
-      <button id="clearBtn" class="px-6 py-3 rounded-2xl bg-slate-100">ล้างค่า</button>
-      <button id="restoreDraftBtn" class="px-6 py-3 rounded-2xl bg-slate-100">กู้ค่าค้าง</button>
+    <div class="sticky-bottom mt-4 border border-slate-300 rounded-2xl p-3 flex gap-2 flex-wrap bg-white/95 shadow-md">
+      <button id="saveBtn" class="px-6 py-3 rounded-2xl bg-${modeColor}-800 text-white font-semibold shadow-md hover:brightness-110">${saveLabel}</button>
+      <button id="clearBtn" class="px-6 py-3 rounded-2xl bg-slate-300 text-slate-950 font-semibold hover:bg-slate-400">ล้างค่า</button>
+      <button id="restoreDraftBtn" class="px-6 py-3 rounded-2xl bg-slate-300 text-slate-950 font-semibold hover:bg-slate-400">กู้ค่าค้าง</button>
     </div>
   `;
 

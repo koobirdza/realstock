@@ -1,9 +1,9 @@
-export const APP_VERSION = "v37-production-stable";
+export const APP_VERSION = "v38-ui-line-fix";
 export const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwSOEIId8C7BVTxCYwiJoSG7N7k4OSy1TfZXJyDHSD2AWSJ7NWGboHYIqMtqbqP2ISn4Q/exec";
 export const ENABLE_SERVICE_WORKER = false;
 export const STORAGE_KEYS = {
-  session: "realstock.session.v37",
-  draft: "realstock.draft.v37"
+  session: "realstock.session.v38",
+  draft: "realstock.draft.v38"
 };
 export const ISSUE_DESTINATIONS = [
   { key: "front", label: "หน้าร้าน" },

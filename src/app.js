@@ -162,6 +162,37 @@ function bindEvents() {
       toast(err?.message || "Export ไม่สำเร็จ", "error");
     }
   });
+
+  el.testLineOABtn?.addEventListener("click", async () => {
+    try {
+      toast("กำลังทดสอบ LINE OA...", "info");
+      const result = await testLineOA();
+      if (!result?.ok) throw new Error(result?.message || "ทดสอบ LINE OA ไม่สำเร็จ");
+      clearInlineError();
+      toast("ส่งข้อความทดสอบ LINE OA สำเร็จ", "success", 4000);
+    } catch (err) {
+      showInlineError(err?.message || "ทดสอบ LINE OA ไม่สำเร็จ");
+      toast(err?.message || "ทดสอบ LINE OA ไม่สำเร็จ", "error", 4500);
+    }
+  });
+
+  el.exportTargetsBtn?.addEventListener("click", async () => {
+    try {
+      toast("กำลังดึง Target IDs...", "info");
+      const result = await exportLineTargets();
+      if (!result?.ok) throw new Error(result?.message || "ดึง Target IDs ไม่สำเร็จ");
+      downloadTextFile(
+        "line_targets.json",
+        JSON.stringify(result.rows || [], null, 2),
+        "application/json"
+      );
+      clearInlineError();
+      toast(`Export Target IDs สำเร็จ • ${(result.rows || []).length} rows`, "success", 3500);
+    } catch (err) {
+      showInlineError(err?.message || "Export Target IDs ไม่สำเร็จ");
+      toast(err?.message || "Export Target IDs ไม่สำเร็จ", "error", 4500);
+    }
+  });
 }
 
 function handleLogin() {
