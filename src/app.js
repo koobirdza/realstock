@@ -248,9 +248,7 @@ async function handleSave() {
     document.querySelectorAll("[data-qty-index]").forEach((el) => el.value = "");
     await loadStockSummary();
     renderAll();
-    toast(`บันทึกสำเร็จ • count ${result.count_saved || 0} • issue ${result.issue_saved || 0} • receive ${result.receive_saved || 0}`, "success", 4000);
-    const report = await getDailyReport();
-    if (report?.ok && report.low_stock_count > 0) showInlineError(`มี ${report.low_stock_count} รายการใกล้หมด ระบบอัปเดตรายงานรายวันแล้ว`);
+    toast(`บันทึกสำเร็จ • count ${result.count_saved || 0} • issue ${result.issue_saved || 0} • receive ${result.receive_saved || 0} • stock ${result.stock_updated || 0}`, "success", 4500);
   } catch (err) {
     console.error(err);
     const msg = err?.message || "เกิดข้อผิดพลาดระหว่างบันทึก";
