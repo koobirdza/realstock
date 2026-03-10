@@ -4,7 +4,7 @@ export function escapeHtml(value=""){
     .replaceAll("&","&amp;")
     .replaceAll("<","&lt;")
     .replaceAll(">","&gt;")
-    .replaceAll(""","&quot;")
+    .replaceAll('"',"&quot;")
     .replaceAll("'","&#39;");
 }
 export function createRequestId(){return "req_"+Date.now()+"_"+Math.random().toString(36).slice(2,10);}
