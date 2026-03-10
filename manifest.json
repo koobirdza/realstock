@@ -1,9 +1,1 @@
-{
-  "name": "RealStock Refactor v30",
-  "short_name": "RealStock",
-  "start_url": "./",
-  "display": "standalone",
-  "background_color": "#fff7ed",
-  "theme_color": "#f97316",
-  "icons": []
-}
+{"name":"RealStock","short_name":"RealStock","start_url":".","display":"standalone","background_color":"#0f172a","theme_color":"#0f172a","icons":[]}

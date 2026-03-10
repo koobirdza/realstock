@@ -3,67 +3,53 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0" />
-  <meta http-equiv="Pragma" content="no-cache" />
-  <meta http-equiv="Expires" content="0" />
-  <title>เจริญไทยสุกี้ • RealStock v38</title>
-  <meta name="theme-color" content="#f97316" />
+  <title>เจริญไทยสุกี้ • RealStock v43</title>
+  <meta name="theme-color" content="#0f172a" />
   <link rel="manifest" href="manifest.json" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    body{font-family:'Prompt',sans-serif}
-    .card{border-radius:1.25rem;box-shadow:0 10px 30px rgba(0,0,0,.08)}
-    .soft-bg{background:linear-gradient(135deg,#ffedd5,#fed7aa,#fdba74)}
-    .sticky-bottom{position:sticky;bottom:0;background:rgba(255,255,255,.92)}
-  
-    .mode-surface-green{background:linear-gradient(135deg,#bbf7d0,#4ade80,#166534)}
-    .mode-surface-blue{background:linear-gradient(135deg,#bfdbfe,#60a5fa,#1d4ed8)}
-    .mode-surface-orange{background:linear-gradient(135deg,#fdba74,#fb923c,#c2410c)}
-    .mode-surface-default{background:linear-gradient(135deg,#f8fafc,#e2e8f0)}
-    .node-front{background:linear-gradient(135deg,#fed7aa,#fb923c)}
-    .node-kitchen{background:linear-gradient(135deg,#bfdbfe,#60a5fa)}
-    .node-bar{background:linear-gradient(135deg,#e9d5ff,#c084fc)}
-    .node-stock{background:linear-gradient(135deg,#c4b5fd,#8b5cf6)}
-    
-    .action-btn{background:#334155;color:#fff;font-weight:600;box-shadow:0 6px 18px rgba(15,23,42,.18)}
-    .action-btn:hover{filter:brightness(1.08)}
-    .nav-btn{background:#475569;color:#fff;font-weight:600}
-    .nav-btn:hover{background:#334155}
-    </style>
-    
+    body{font-family:'Prompt',sans-serif;background:linear-gradient(135deg,#0f172a 0%,#1e293b 45%,#334155 100%)}
+    .card{border-radius:1.25rem;box-shadow:0 12px 34px rgba(15,23,42,.25)}
+    .panel{background:rgba(255,255,255,.96);border:1px solid rgba(148,163,184,.5)}
+    .mode-count{background:linear-gradient(135deg,#14532d,#166534,#22c55e)}
+    .mode-issue{background:linear-gradient(135deg,#1e3a8a,#1d4ed8,#3b82f6)}
+    .mode-order{background:linear-gradient(135deg,#7c2d12,#c2410c,#fb923c)}
+    .mode-receive{background:linear-gradient(135deg,#78350f,#b45309,#f59e0b)}
+    .action-btn{background:#1e293b;color:#fff;font-weight:600}
+    .nav-btn{background:#334155;color:#fff;font-weight:600}
+    .sticky-bottom{position:sticky;bottom:0;background:rgba(255,255,255,.96)}
+  </style>
 </head>
-<body class="soft-bg min-h-screen text-slate-900">
-  <div class="max-w-6xl mx-auto p-4 md:p-6">
-    <div class="flex items-center justify-between gap-3 mb-5">
+<body class="min-h-screen text-slate-900">
+  <div class="max-w-7xl mx-auto p-4 md:p-6">
+    <div class="flex items-center justify-between gap-4 mb-5">
       <div>
-        <h1 class="text-2xl md:text-3xl font-bold">🍲 ระบบเช็คสต๊อก • เจริญไทยสุกี้</h1>
-        <p class="text-sm text-slate-600">Inventory Plus v42 • Faster Save • LINE OA • Daily Report • Excel Export</p>
+        <h1 class="text-2xl md:text-3xl font-bold text-white">🍲 ระบบเช็คสต๊อก • เจริญไทยสุกี้</h1>
+        <p class="text-sm text-slate-300">Inventory Plus v43 • Sheet Driven • Order View • Nightly LINE 23:00</p>
       </div>
-      <div class="text-xs text-slate-500 text-right">
+      <div class="text-xs text-right text-slate-300">
         <div id="versionLabel"></div>
         <div id="healthBadge">กำลังตรวจสอบเซิร์ฟเวอร์...</div>
         <div id="draftBadge"></div>
       </div>
     </div>
-
     <div id="fatalError" class="hidden mb-4 rounded-2xl bg-red-50 border border-red-200 p-4 text-red-700"></div>
     <div id="errorPanel" class="hidden mb-4 rounded-2xl bg-amber-50 border border-amber-200 p-4 text-amber-800"></div>
     <div id="toast" class="hidden fixed top-4 right-4 z-50 rounded-2xl px-4 py-3 shadow-xl text-white"></div>
 
     <section id="loginPage" class="max-w-md mx-auto">
-      <div class="card bg-white p-6">
+      <div class="card panel p-6">
         <h2 class="text-xl font-semibold mb-4">🔐 เข้าสู่ระบบพนักงาน</h2>
         <input id="employeeName" type="text" class="w-full border rounded-2xl px-4 py-3 mb-3" placeholder="เช่น เอ, บีม, หมี" />
-        <button id="loginBtn" class="w-full rounded-2xl bg-orange-700 text-white py-3 font-semibold shadow-md hover:bg-orange-800">เข้าสู่ระบบ</button>
-        <p class="text-xs text-slate-500 mt-3">การเข้าสู่ระบบเป็น local session ไม่ต้องรอเซิร์ฟเวอร์</p>
+        <button id="loginBtn" class="w-full rounded-2xl bg-slate-900 text-white py-3 font-semibold">เข้าสู่ระบบ</button>
       </div>
     </section>
 
     <section id="appPage" class="hidden">
-      <div class="card bg-white/95 p-4 md:p-5 mb-4 border border-slate-300">
+      <div class="card panel p-4 md:p-5 mb-4">
         <div class="flex items-center justify-between gap-3 flex-wrap">
           <div>👤 ผู้ใช้งาน: <span id="employeeDisplay" class="font-semibold"></span></div>
           <div class="flex items-center gap-2 flex-wrap">
@@ -73,65 +59,45 @@
         </div>
       </div>
 
-      <div id="modePanel" class="grid md:grid-cols-3 gap-4 mb-4">
-        <button id="countModeBtn" class="card p-5 text-left text-white" style="background:linear-gradient(135deg,#16a34a,#22c55e,#86efac)">
-          <div class="text-xl font-bold">🟢 นับสต๊อก</div>
-          <div class="text-sm mt-1 text-white/90">กรอกยอดคงเหลือ ณ ตอนนั้น</div>
-        </button>
-        <button id="issueModeBtn" class="card p-5 text-left text-white" style="background:linear-gradient(135deg,#2563eb,#3b82f6,#93c5fd)">
-          <div class="text-xl font-bold">🔵 เบิกของ</div>
-          <div class="text-sm mt-1 text-white/90">กรอกจำนวนที่เบิกออกจากจุดต้นทาง</div>
-        </button>
-        <button id="receiveModeBtn" class="card p-5 text-left text-white" style="background:linear-gradient(135deg,#ea580c,#f97316,#fdba74)">
-          <div class="text-xl font-bold">🟠 รับของเข้า</div>
-          <div class="text-sm mt-1 text-white/90">กรอกจำนวนของเข้าประจำวัน</div>
-        </button>
+      <div class="grid md:grid-cols-4 gap-4 mb-4">
+        <button id="countModeBtn" class="card p-5 text-left text-white mode-count"><div class="text-xl font-bold">🟢 นับสต๊อก</div><div class="text-sm mt-1 text-white/90">นับคงเหลือของแต่ละวัน</div></button>
+        <button id="issueModeBtn" class="card p-5 text-left text-white mode-issue"><div class="text-xl font-bold">🔵 เบิกของ</div><div class="text-sm mt-1 text-white/90">ใช้กับของที่มีในห้องสต๊อกเท่านั้น</div></button>
+        <button id="orderModeBtn" class="card p-5 text-left text-white mode-order"><div class="text-xl font-bold">🟠 สั่งของ</div><div class="text-sm mt-1 text-white/90">ดูจำนวนที่ควรสั่งสำหรับวันถัดไป</div></button>
+        <button id="receiveModeBtn" class="card p-5 text-left text-white mode-receive"><div class="text-xl font-bold">🟤 รับของเข้า</div><div class="text-sm mt-1 text-white/90">บันทึกของเข้าประจำวัน</div></button>
       </div>
 
       <div id="navPanel" class="hidden">
-        <div class="card bg-white/95 p-4 md:p-5 mb-4 border border-slate-300">
+        <div class="card panel p-4 md:p-5 mb-4">
           <div class="flex gap-2 flex-wrap items-center justify-between">
             <div>
               <div class="font-semibold">เครื่องมือระบบ</div>
-              <div class="text-sm text-slate-500">ใช้ตรวจระบบ ดูรายงานรายวัน และ export ข้อมูลได้จากหน้าเว็บ</div>
+              <div class="text-sm text-slate-500">เช็กระบบ รีเฟรช LINE Summary และส่งรายงาน 23:00 แบบ manual ได้</div>
             </div>
             <div class="flex gap-2 flex-wrap">
               <button id="healthCheckBtn" class="px-4 py-2 rounded-xl action-btn">เช็กเซิร์ฟเวอร์</button>
-              <button id="refreshWeeklyBtn" class="px-4 py-2 rounded-xl action-btn">รีเฟรช Weekly</button>
-              <button id="dailyReportBtn" class="px-4 py-2 rounded-xl action-btn">ดูรายงานรายวัน</button>
-              <button id="exportExcelBtn" class="px-4 py-2 rounded-xl action-btn">Export Excel</button>
-              <button id="exportDebugBtn" class="px-4 py-2 rounded-xl action-btn">Export Debug</button>
+              <button id="dailySnapshotBtn" class="px-4 py-2 rounded-xl action-btn">ภาพรวมวันนี้</button>
+              <button id="refreshLineSummaryBtn" class="px-4 py-2 rounded-xl action-btn">รีเฟรช LINE Summary</button>
+              <button id="previewLineSummaryBtn" class="px-4 py-2 rounded-xl action-btn">Preview LINE</button>
+              <button id="sendLineSummaryBtn" class="px-4 py-2 rounded-xl action-btn">ส่ง LINE สรุป</button>
               <button id="testLineOABtn" class="px-4 py-2 rounded-xl action-btn">ทดสอบ LINE OA</button>
+              <button id="exportDebugBtn" class="px-4 py-2 rounded-xl action-btn">Export Debug</button>
               <button id="exportTargetsBtn" class="px-4 py-2 rounded-xl action-btn">Export Target IDs</button>
             </div>
           </div>
         </div>
 
-        <div class="card bg-white/95 p-4 md:p-5 mb-4 border border-slate-300">
+        <div class="card panel p-4 md:p-5 mb-4">
           <div class="flex items-center justify-between gap-3 flex-wrap mb-4">
-            <div>
-              <div class="text-sm text-slate-500">ตำแหน่งปัจจุบัน</div>
-              <div id="breadcrumb" class="font-semibold"></div>
-            </div>
-            <div class="flex gap-2">
-              <button id="homeBtn" class="px-4 py-2 rounded-xl nav-btn">หน้าแรก</button>
-              <button id="backBtn" class="px-4 py-2 rounded-xl nav-btn">ย้อนกลับ</button>
-            </div>
+            <div><div class="text-sm text-slate-500">ตำแหน่งปัจจุบัน</div><div id="breadcrumb" class="font-semibold"></div></div>
+            <div class="flex gap-2"><button id="homeBtn" class="px-4 py-2 rounded-xl nav-btn">หน้าแรก</button><button id="backBtn" class="px-4 py-2 rounded-xl nav-btn">ย้อนกลับ</button></div>
           </div>
-
-          <div id="destinationWrap" class="hidden mb-4">
-            <div class="text-sm font-semibold text-slate-700 mb-2">ปลายทางการเบิก</div>
-            <div id="destinationButtons" class="grid grid-cols-1 sm:grid-cols-3 gap-2"></div>
-            <div class="text-xs text-slate-500 mt-2">ต้องเลือกปลายทางก่อนบันทึกในโหมดเบิกของจากห้องสต๊อก</div>
-          </div>
-
+          <div id="destinationWrap" class="hidden mb-4"><div class="text-sm font-semibold text-slate-700 mb-2">ปลายทางการเบิก</div><div id="destinationButtons" class="grid grid-cols-1 sm:grid-cols-3 gap-2"></div></div>
           <div id="nodeList" class="grid md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
           <div id="itemPanel" class="hidden"></div>
         </div>
       </div>
     </section>
   </div>
-
   <script type="module" src="./src/app.js"></script>
 </body>
 </html>
