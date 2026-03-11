@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>เจริญไทยสุกี้ • RealStock v46</title>
+  <title>เจริญไทยสุกี้ • RealStock v47</title>
   <meta name="theme-color" content="#0f172a" />
   <link rel="manifest" href="manifest.json" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -18,7 +18,6 @@
     .mode-issue{background:linear-gradient(135deg,#1e3a8a,#1d4ed8,#3b82f6)}
     .mode-order{background:linear-gradient(135deg,#7c2d12,#c2410c,#fb923c)}
     .mode-receive{background:linear-gradient(135deg,#78350f,#b45309,#f59e0b)}
-    .action-btn{background:#1e293b;color:#fff;font-weight:600}
     .nav-btn{background:#334155;color:#fff;font-weight:600}
     .sticky-bottom{position:sticky;bottom:0;background:rgba(255,255,255,.96)}
   </style>
@@ -28,7 +27,7 @@
     <div class="flex items-center justify-between gap-4 mb-5">
       <div>
         <h1 class="text-2xl md:text-3xl font-bold text-white">🍲 ระบบเช็คสต๊อก • เจริญไทยสุกี้</h1>
-        <p class="text-sm text-slate-300">Inventory Plus v46 • Speed Optimized • Script Computed Views • Nightly LINE 23:00</p>
+        <p class="text-sm text-slate-300">Inventory Plus v47 • Clean Optimized • Fast Mode Switching</p>
       </div>
       <div class="text-xs text-right text-slate-300">
         <div id="versionLabel"></div>
@@ -61,32 +60,25 @@
       </div>
 
       <div class="grid md:grid-cols-4 gap-4 mb-4">
-        <button id="countModeBtn" class="card p-5 text-left text-white mode-count"><div class="text-xl font-bold">🟢 นับสต๊อก</div><div class="text-sm mt-1 text-white/90">โหลดเฉพาะโหมดที่เปิดจริง</div></button>
-        <button id="issueModeBtn" class="card p-5 text-left text-white mode-issue"><div class="text-xl font-bold">🔵 เบิกของ</div><div class="text-sm mt-1 text-white/90">ใช้กับของในห้องสต๊อกเท่านั้น</div></button>
-        <button id="orderModeBtn" class="card p-5 text-left text-white mode-order"><div class="text-xl font-bold">🟠 สั่งของ</div><div class="text-sm mt-1 text-white/90">อ่านจากชีตสรุปที่ script สร้างไว้</div></button>
-        <button id="receiveModeBtn" class="card p-5 text-left text-white mode-receive"><div class="text-xl font-bold">🟤 รับของเข้า</div><div class="text-sm mt-1 text-white/90">บันทึกแล้วรีเฟรช summary ให้อัตโนมัติ</div></button>
+        <button id="countModeBtn" class="card p-5 text-left text-white mode-count">
+          <div class="text-xl font-bold">🟢 นับสต๊อก</div>
+          <div class="text-sm mt-1 text-white/90">บันทึกยอดคงเหลือจริง</div>
+        </button>
+        <button id="issueModeBtn" class="card p-5 text-left text-white mode-issue">
+          <div class="text-xl font-bold">🔵 เบิกของ</div>
+          <div class="text-sm mt-1 text-white/90">เบิกจากห้องสต๊อกไปยังจุดใช้งาน</div>
+        </button>
+        <button id="orderModeBtn" class="card p-5 text-left text-white mode-order">
+          <div class="text-xl font-bold">🟠 สั่งของ</div>
+          <div class="text-sm mt-1 text-white/90">รายการที่ควรสั่งสำหรับวันถัดไป</div>
+        </button>
+        <button id="receiveModeBtn" class="card p-5 text-left text-white mode-receive">
+          <div class="text-xl font-bold">🟤 รับของเข้า</div>
+          <div class="text-sm mt-1 text-white/90">เพิ่มสต๊อกจากการรับวัตถุดิบ</div>
+        </button>
       </div>
 
       <div id="navPanel" class="hidden">
-        <div id="systemToolsCard" class="card panel p-4 md:p-5 mb-4">
-          <div class="flex gap-2 flex-wrap items-center justify-between">
-            <div>
-              <div class="font-semibold">เครื่องมือระบบ</div>
-              <div class="text-sm text-slate-500">ปรับให้เบาลงโดยใช้ summary sheets และ lazy load หน้าเว็บ</div>
-            </div>
-            <div class="flex gap-2 flex-wrap">
-              <button id="healthCheckBtn" class="px-4 py-2 rounded-xl action-btn">เช็กเซิร์ฟเวอร์</button>
-              <button id="dailySnapshotBtn" class="px-4 py-2 rounded-xl action-btn">ภาพรวมวันนี้</button>
-              <button id="refreshLineSummaryBtn" class="px-4 py-2 rounded-xl action-btn">รีเฟรช LINE Summary</button>
-              <button id="previewLineSummaryBtn" class="px-4 py-2 rounded-xl action-btn">Preview LINE</button>
-              <button id="sendLineSummaryBtn" class="px-4 py-2 rounded-xl action-btn">ส่ง LINE สรุป</button>
-              <button id="testLineOABtn" class="px-4 py-2 rounded-xl action-btn">ทดสอบ LINE OA</button>
-              <button id="exportDebugBtn" class="px-4 py-2 rounded-xl action-btn">Export Debug</button>
-              <button id="exportTargetsBtn" class="px-4 py-2 rounded-xl action-btn">Export Target IDs</button>
-            </div>
-          </div>
-        </div>
-
         <div class="card panel p-4 md:p-5 mb-4">
           <div class="flex items-center justify-between gap-3 flex-wrap mb-4">
             <div>
@@ -111,6 +103,6 @@
     </section>
   </div>
 
-  <script type="module" src="./src/app.v46.js"></script>
+  <script type="module" src="./src/app.v47.js"></script>
 </body>
 </html>
