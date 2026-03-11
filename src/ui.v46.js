@@ -22,35 +22,45 @@ export function bindDom() {
     "countModeBtn", "issueModeBtn", "orderModeBtn", "receiveModeBtn", "currentModeBadge",
     "navPanel", "breadcrumb", "homeBtn", "backBtn", "destinationWrap", "destinationButtons",
     "nodeList", "itemPanel", "healthCheckBtn", "dailySnapshotBtn", "refreshLineSummaryBtn",
-    "previewLineSummaryBtn", "sendLineSummaryBtn", "testLineOABtn", "exportDebugBtn", "exportTargetsBtn"
+    "previewLineSummaryBtn", "sendLineSummaryBtn", "testLineOABtn", "exportDebugBtn",
+    "exportTargetsBtn", "systemToolsCard"
   ].forEach((id) => {
     const found = document.getElementById(id);
     if (found) els[id] = found;
   });
+
   if (els.versionLabel) els.versionLabel.textContent = APP_VERSION;
 }
 
-export function dom() { return els; }
+export function dom() {
+  return els;
+}
+
 export function showFatalError(msg) {
   els.fatalError.textContent = msg;
   els.fatalError.classList.remove("hidden");
 }
+
 export function showInlineError(msg) {
   els.errorPanel.textContent = msg;
   els.errorPanel.classList.remove("hidden");
 }
+
 export function clearInlineError() {
   els.errorPanel.textContent = "";
   els.errorPanel.classList.add("hidden");
 }
+
 export function setHealth(ok, text) {
   els.healthBadge.textContent = text;
   els.healthBadge.className = ok ? "text-emerald-300" : "text-amber-300";
 }
+
 export function setDraftBadge(text = "") {
   els.draftBadge.textContent = text;
   els.draftBadge.className = text ? "text-blue-300" : "text-slate-300";
 }
+
 export function toast(msg, type = "info", timeout = 2600) {
   const map = { info: "bg-slate-800", success: "bg-emerald-600", error: "bg-red-600", warn: "bg-amber-600" };
   els.toast.textContent = msg;
@@ -59,6 +69,7 @@ export function toast(msg, type = "info", timeout = 2600) {
   clearTimeout(els.toastTimer);
   els.toastTimer = setTimeout(() => els.toast.classList.add("hidden"), timeout);
 }
+
 export function renderSession() {
   const loggedIn = !!state.employee;
   els.loginPage.classList.toggle("hidden", loggedIn);
@@ -66,24 +77,31 @@ export function renderSession() {
   els.employeeDisplay.textContent = state.employee || "";
   els.employeeName.value = state.employee || "";
 }
+
 export function renderMode() {
   const meta = getModeMeta(state.mode);
   els.currentModeBadge.textContent = meta.label;
   els.currentModeBadge.className = `px-3 py-1 rounded-full text-sm border ${badge(meta.color)}`;
   els.navPanel.classList.toggle("hidden", !state.mode);
 }
+
 export function renderDestinationPicker(onPick) {
   const show = needsDestination(state.mode, state.path);
   els.destinationWrap.classList.toggle("hidden", !show);
+
   if (!show) {
     els.destinationButtons.innerHTML = "";
     return;
   }
+
   els.destinationButtons.innerHTML = ISSUE_DESTINATIONS.map((x) => {
     const active = state.destination === x.key;
     return `<button data-dest="${escapeHtml(x.key)}" class="px-4 py-3 rounded-2xl border font-semibold ${active ? "bg-blue-900 text-white border-blue-950" : "bg-slate-200 text-slate-900 border-slate-400"}">${escapeHtml(x.label)}</button>`;
   }).join("");
-  els.destinationButtons.querySelectorAll("[data-dest]").forEach((btn) => btn.addEventListener("click", () => onPick(btn.dataset.dest)));
+
+  els.destinationButtons
+    .querySelectorAll("[data-dest]")
+    .forEach((btn) => btn.addEventListener("click", () => onPick(btn.dataset.dest)));
 }
 
 function renderOrder(rows) {
@@ -91,6 +109,7 @@ function renderOrder(rows) {
     els.itemPanel.innerHTML = '<div class="rounded-2xl border border-dashed border-slate-300 p-6 text-slate-500">ไม่พบรายการสั่งของในหมวดนี้</div>';
     return;
   }
+
   els.itemPanel.innerHTML = `<div class="rounded-2xl border border-slate-300 overflow-hidden bg-white shadow-sm">
     <div class="px-4 py-3 bg-slate-900 text-white font-semibold">รายการที่ควรสั่งสำหรับวันถัดไป</div>
     <div class="overflow-auto">
@@ -119,14 +138,33 @@ function renderOrder(rows) {
 }
 
 function renderInputs(items, handlers, stockSummary = {}) {
-  const saveLabel = state.mode === "count" ? "💾 บันทึกยอดคงเหลือ" : state.mode === "issue" ? "💾 บันทึกการเบิก" : "💾 บันทึกรับของเข้า";
-  const hint = state.mode === "count" ? "ยอดคงเหลือ" : state.mode === "issue" ? "จำนวนที่เบิก" : "จำนวนที่รับเข้า";
-  const modeColor = state.mode === "count" ? "emerald" : state.mode === "issue" ? "blue" : "orange";
+  const saveLabel =
+    state.mode === "count"
+      ? "💾 บันทึกยอดคงเหลือ"
+      : state.mode === "issue"
+      ? "💾 บันทึกการเบิก"
+      : "💾 บันทึกรับของเข้า";
+
+  const hint =
+    state.mode === "count"
+      ? "ยอดคงเหลือ"
+      : state.mode === "issue"
+      ? "จำนวนที่เบิก"
+      : "จำนวนที่รับเข้า";
+
+  const modeColor =
+    state.mode === "count"
+      ? "emerald"
+      : state.mode === "issue"
+      ? "blue"
+      : "orange";
+
   els.itemPanel.innerHTML = `<div class="space-y-3">${items.map((item, idx) => {
     const summary = stockSummary[item.item_key] || {};
     const hasStock = summary.current_stock !== undefined && summary.current_stock !== null && summary.current_stock !== "";
     const stockLine = hasStock ? `คงเหลือ ${escapeHtml(summary.current_stock)} ${escapeHtml(summary.unit || item.unit || "")}` : "คงเหลือ -";
     const lowBadge = summary.status === "LOW" ? '<span class="inline-block mt-2 text-xs px-2 py-1 rounded-full bg-red-100 text-red-700">ต่ำกว่าขั้นต่ำ</span>' : "";
+
     return `<div class="rounded-2xl border border-slate-300 p-4 bg-white shadow-sm">
       <div class="flex items-start justify-between gap-3 flex-wrap">
         <div class="min-w-[220px] flex-1">
@@ -144,17 +182,15 @@ function renderInputs(items, handlers, stockSummary = {}) {
   }).join("")}</div>
   <div class="sticky-bottom mt-4 border border-slate-300 rounded-2xl p-3 flex gap-2 flex-wrap bg-white shadow-md">
     <button id="saveBtn" class="px-6 py-3 rounded-2xl bg-${modeColor}-800 text-white font-semibold shadow-md">${saveLabel}</button>
-    <button id="clearBtn" class="px-6 py-3 rounded-2xl bg-slate-300 text-slate-950 font-semibold">ล้างค่า</button>
-    <button id="restoreDraftBtn" class="px-6 py-3 rounded-2xl bg-slate-300 text-slate-950 font-semibold">กู้ค่าค้าง</button>
   </div>`;
+
   qs("saveBtn").addEventListener("click", handlers.onSave);
-  qs("clearBtn").addEventListener("click", handlers.onClear);
-  qs("restoreDraftBtn").addEventListener("click", handlers.onRestoreDraft);
 }
 
 export function renderNavigation(node, handlers, stockSummary = {}, orderRows = []) {
   els.breadcrumb.textContent = getPathLabels(handlers.catalogTree, state.path).join(" › ");
   renderDestinationPicker(handlers.onPickDestination);
+
   const children = getChildren(node);
   const items = getItems(node);
 
@@ -179,5 +215,6 @@ export function renderNavigation(node, handlers, stockSummary = {}, orderRows = 
     els.itemPanel.innerHTML = '<div class="rounded-2xl border border-dashed border-slate-300 p-6 text-slate-500">ไม่พบรายการสินค้าในหมวดนี้</div>';
     return;
   }
+
   renderInputs(items, handlers, stockSummary);
 }
