@@ -1,1 +1,9 @@
-{"name":"RealStock","short_name":"RealStock","start_url":".","display":"standalone","background_color":"#0f172a","theme_color":"#0f172a","icons":[]}
+{
+  "name": "RealStock v47",
+  "short_name": "RealStock",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "icons": []
+}
