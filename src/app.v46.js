@@ -1,4 +1,3 @@
-
 import { AUTOSAVE_DEBOUNCE_MS, ENABLE_SERVICE_WORKER, SAVE_TIMEOUT_MS } from "./config.v46.js";
 import { restoreSession, saveSession, clearSession } from "./auth.v46.js";
 import { saveDraft, clearDraft, readDraft } from "./store.v46.js";
@@ -14,20 +13,39 @@ let saveInFlight = false;
 function currentCatalogTree() {
   return state.catalogs[state.mode] || {};
 }
+
 function currentNode() {
   return getNodeByPath(currentCatalogTree(), state.path) || getRootNode(currentCatalogTree());
 }
+
 function updateDraftBadge() {
   const draft = readDraft();
-  if (draft?.savedAt) setDraftBadge("มีข้อมูลค้าง: " + new Date(draft.savedAt).toLocaleString("th-TH"));
-  else setDraftBadge("");
+  if (draft?.savedAt) {
+    setDraftBadge("มีข้อมูลค้าง: " + new Date(draft.savedAt).toLocaleString("th-TH"));
+  } else {
+    setDraftBadge("");
+  }
 }
+
 const autosaveDraft = debounce(() => {
   const inputs = [...document.querySelectorAll("[data-qty-index]")]
     .map((el) => ({ index: Number(el.dataset.qtyIndex), value: el.value }))
     .filter((x) => x.value !== "");
+
   if (!inputs.length) return;
-  saveDraft([{ meta: { employee: state.employee, mode: state.mode, path: [...state.path], destination: state.destination }, inputs }]);
+
+  saveDraft([
+    {
+      meta: {
+        employee: state.employee,
+        mode: state.mode,
+        path: [...state.path],
+        destination: state.destination
+      },
+      inputs
+    }
+  ]);
+
   updateDraftBadge();
 }, AUTOSAVE_DEBOUNCE_MS);
 
@@ -39,65 +57,95 @@ function attachAutosave() {
     })
   );
 }
+
 async function loadCatalogForMode(mode) {
   const result = await getCatalog(mode);
   if (!result?.ok) throw new Error(result?.message || "โหลดรายการไม่สำเร็จ");
   state.catalogs[mode] = result.catalog_tree || {};
 }
+
 async function ensureCatalogLoaded(mode) {
-  if (!state.catalogs[mode]) await loadCatalogForMode(mode);
+  if (!state.catalogs[mode]) {
+    await loadCatalogForMode(mode);
+  }
 }
+
 async function loadStockSummary(force = false) {
   if (force) clearApiCache("currentStock::");
   const result = await getCurrentStockSummary();
   if (!result?.ok) throw new Error(result?.message || "โหลดสรุปสต๊อกไม่สำเร็จ");
   state.stockSummary = result.stock || {};
 }
+
 async function loadOrderViewData(force = false) {
   if (force) clearApiCache("orderView::");
   const result = await getOrderView();
   if (!result?.ok) throw new Error(result?.message || "โหลดรายการสั่งของไม่สำเร็จ");
   state.orderRows = result.rows || [];
 }
+
 function renderAll() {
   renderSession();
   renderMode();
+
   if (!state.employee || !state.mode) return;
-  renderNavigation(currentNode(), {
-    catalogTree: currentCatalogTree(),
-    onOpenChild: (key) => {
-      state.path.push(key);
-      renderAll();
-      attachAutosave();
+
+  renderNavigation(
+    currentNode(),
+    {
+      catalogTree: currentCatalogTree(),
+      onOpenChild: (key) => {
+        state.path.push(key);
+        renderAll();
+        attachAutosave();
+      },
+      onPickDestination: (dest) => {
+        state.destination = dest;
+        renderAll();
+        attachAutosave();
+      },
+      onSave: handleSave,
+      onClear: () => {
+        document.querySelectorAll("[data-qty-index]").forEach((el) => {
+          el.value = "";
+        });
+        clearDraft();
+        updateDraftBadge();
+        toast("ล้างค่าในฟอร์มแล้ว", "info");
+      },
+      onRestoreDraft: restoreDraftIntoForm
     },
-    onPickDestination: (dest) => {
-      state.destination = dest;
-      renderAll();
-      attachAutosave();
-    },
-    onSave: handleSave,
-    onClear: () => {
-      document.querySelectorAll("[data-qty-index]").forEach((el) => (el.value = ""));
-      clearDraft();
-      updateDraftBadge();
-      toast("ล้างค่าในฟอร์มแล้ว", "info");
-    },
-    onRestoreDraft: restoreDraftIntoForm
-  }, state.stockSummary, state.orderRows);
+    state.stockSummary,
+    state.orderRows
+  );
+
   attachAutosave();
 }
+
 async function refreshHealth() {
   const result = await pingServer();
-  setHealth(!!result?.ok, result?.ok ? `เซิร์ฟเวอร์พร้อม • ${result.version || ""}` : `เซิร์ฟเวอร์มีปัญหา • ${result?.message || ""}`);
+  setHealth(
+    !!result?.ok,
+    result?.ok
+      ? `เซิร์ฟเวอร์พร้อม • ${result.version || ""}`
+      : `เซิร์ฟเวอร์มีปัญหา • ${result?.message || ""}`
+  );
 }
+
 async function prepareMode(mode) {
   setMode(mode);
   clearInlineError();
   await ensureCatalogLoaded(mode);
-  if (mode === "order") await loadOrderViewData();
-  else await loadStockSummary();
+
+  if (mode === "order") {
+    await loadOrderViewData();
+  } else {
+    await loadStockSummary();
+  }
+
   renderAll();
 }
+
 function snapshotText(snapshot) {
   return [
     `วันที่: ${snapshot.report_date || "-"}`,
@@ -106,9 +154,9 @@ function snapshotText(snapshot) {
     `รับของวันนี้: ${snapshot.receive_count || 0} รายการ`,
     `ของในห้องสต๊อกต่ำกว่าขั้นต่ำ: ${snapshot.low_stock_count || 0} รายการ`,
     `ของสดที่ควรสั่งพรุ่งนี้: ${snapshot.order_count || 0} รายการ`
-  ].join("
-");
+  ].join("\n");
 }
+
 function downloadTextFile(filename, text, mimeType = "text/plain;charset=utf-8") {
   const blob = new Blob([text], { type: mimeType });
   const url = URL.createObjectURL(blob);
@@ -120,27 +168,34 @@ function downloadTextFile(filename, text, mimeType = "text/plain;charset=utf-8")
   a.remove();
   URL.revokeObjectURL(url);
 }
+
 function bindEvents() {
   const el = dom();
+
   el.loginBtn.addEventListener("click", handleLogin);
   el.logoutBtn.addEventListener("click", handleLogout);
+
   el.countModeBtn.addEventListener("click", async () => prepareMode("count"));
   el.issueModeBtn.addEventListener("click", async () => prepareMode("issue"));
   el.orderModeBtn.addEventListener("click", async () => prepareMode("order"));
   el.receiveModeBtn.addEventListener("click", async () => prepareMode("receive"));
+
   el.homeBtn.addEventListener("click", () => {
     resetNavigation();
     clearInlineError();
     renderAll();
   });
+
   el.backBtn.addEventListener("click", () => {
     if (state.path.length) state.path.pop();
     clearInlineError();
     renderAll();
   });
+
   el.employeeName.addEventListener("keydown", (e) => {
     if (e.key === "Enter") handleLogin();
   });
+
   el.healthCheckBtn?.addEventListener("click", async () => {
     try {
       await refreshHealth();
@@ -149,6 +204,7 @@ function bindEvents() {
       showInlineError(err?.message || "เช็กเซิร์ฟเวอร์ไม่สำเร็จ");
     }
   });
+
   el.dailySnapshotBtn?.addEventListener("click", async () => {
     try {
       const result = await getDailySnapshot();
@@ -159,20 +215,29 @@ function bindEvents() {
       showInlineError(err?.message || "ดึงภาพรวมไม่สำเร็จ");
     }
   });
+
   el.refreshLineSummaryBtn?.addEventListener("click", async () => {
     try {
       const result = await refreshLineSummary();
       if (!result?.ok) throw new Error(result?.message || "รีเฟรชไม่สำเร็จ");
+
       clearApiCache("orderView::");
       clearApiCache("currentStock::");
+
       toast(`รีเฟรช LINE Summary สำเร็จ • ${result.row_count || 0} แถว`, "success", 4500);
-      if (state.mode === "order") await loadOrderViewData(true);
-      else if (state.mode) await loadStockSummary(true);
+
+      if (state.mode === "order") {
+        await loadOrderViewData(true);
+      } else if (state.mode) {
+        await loadStockSummary(true);
+      }
+
       if (state.mode) renderAll();
     } catch (err) {
       showInlineError(err?.message || "รีเฟรช LINE Summary ไม่สำเร็จ");
     }
   });
+
   el.previewLineSummaryBtn?.addEventListener("click", async () => {
     try {
       const result = await previewLineSummary();
@@ -183,6 +248,7 @@ function bindEvents() {
       showInlineError(err?.message || "Preview LINE ไม่สำเร็จ");
     }
   });
+
   el.sendLineSummaryBtn?.addEventListener("click", async () => {
     try {
       const result = await sendLineSummary();
@@ -193,6 +259,7 @@ function bindEvents() {
       showInlineError(err?.message || "ส่ง LINE สรุปไม่สำเร็จ");
     }
   });
+
   el.testLineOABtn?.addEventListener("click", async () => {
     try {
       const result = await testLineOA();
@@ -203,6 +270,7 @@ function bindEvents() {
       showInlineError(err?.message || "ทดสอบ LINE OA ไม่สำเร็จ");
     }
   });
+
   el.exportDebugBtn?.addEventListener("click", async () => {
     try {
       const result = await exportDebugLog();
@@ -213,6 +281,7 @@ function bindEvents() {
       showInlineError(err?.message || "Export Debug ไม่สำเร็จ");
     }
   });
+
   el.exportTargetsBtn?.addEventListener("click", async () => {
     try {
       const result = await exportLineTargets();
@@ -224,18 +293,22 @@ function bindEvents() {
     }
   });
 }
+
 function handleLogin() {
   const name = dom().employeeName.value.trim();
+
   if (!name) {
     showInlineError("กรุณากรอกชื่อพนักงานก่อนเข้าสู่ระบบ");
     return;
   }
+
   setEmployee(name);
   saveSession();
   clearInlineError();
   renderAll();
   toast("เข้าสู่ระบบแล้ว", "success");
 }
+
 function handleLogout() {
   clearSession();
   clearDraft();
@@ -246,44 +319,81 @@ function handleLogout() {
   renderAll();
   toast("ออกจากระบบแล้ว", "info");
 }
+
 function restoreDraftIntoForm() {
   const draft = readDraft();
   const payload = draft?.payload?.[0];
+
   if (!payload?.inputs?.length) {
     toast("ไม่พบข้อมูลค้าง", "warn");
     return;
   }
+
   const meta = payload.meta || {};
+
   if (meta.mode && meta.mode !== state.mode) {
     showInlineError("ข้อมูลค้างเป็นคนละโหมด กรุณาเลือกโหมดให้ตรงก่อนกู้ข้อมูล");
     return;
   }
+
   const inputs = [...document.querySelectorAll("[data-qty-index]")];
+
   payload.inputs.forEach((saved) => {
-    const input = inputs.find((inputEl) => Number(inputEl.dataset.qtyIndex) === Number(saved.index));
+    const input = inputs.find(
+      (inputEl) => Number(inputEl.dataset.qtyIndex) === Number(saved.index)
+    );
     if (input) input.value = saved.value;
   });
+
   toast("กู้ค่าค้างกลับมาแล้ว", "success");
 }
+
 async function handleSave() {
   if (saveInFlight) return;
+
   saveInFlight = true;
+
   try {
     clearInlineError();
-    const inputRows = [...document.querySelectorAll("[data-qty-index]")].map((el) => ({ index: Number(el.dataset.qtyIndex), value: el.value }));
+
+    const inputRows = [...document.querySelectorAll("[data-qty-index]")].map((el) => ({
+      index: Number(el.dataset.qtyIndex),
+      value: el.value
+    }));
+
     const records = collectRecords(currentCatalogTree(), inputRows);
-    saveDraft([{ meta: { employee: state.employee, mode: state.mode, path: [...state.path], destination: state.destination }, inputs: inputRows.filter((x) => x.value !== "") }]);
+
+    saveDraft([
+      {
+        meta: {
+          employee: state.employee,
+          mode: state.mode,
+          path: [...state.path],
+          destination: state.destination
+        },
+        inputs: inputRows.filter((x) => x.value !== "")
+      }
+    ]);
+
     updateDraftBadge();
+
     const result = await submitRecords(records, SAVE_TIMEOUT_MS);
     if (!result?.ok) throw new Error(result?.message || "บันทึกไม่สำเร็จ");
+
     clearDraft();
     updateDraftBadge();
-    document.querySelectorAll("[data-qty-index]").forEach((el) => (el.value = ""));
-    if (state.mode === "order") await loadOrderViewData(true);
-    else {
+
+    document.querySelectorAll("[data-qty-index]").forEach((el) => {
+      el.value = "";
+    });
+
+    if (state.mode === "order") {
+      await loadOrderViewData(true);
+    } else {
       await loadStockSummary(true);
       await loadOrderViewData(true);
     }
+
     renderAll();
     toast(`บันทึกสำเร็จ • ${result.saved || 0} รายการ`, "success", 4500);
   } catch (err) {
@@ -292,6 +402,7 @@ async function handleSave() {
     saveInFlight = false;
   }
 }
+
 async function init() {
   try {
     bindDom();
@@ -300,6 +411,7 @@ async function init() {
     bindEvents();
     await refreshHealth();
     renderAll();
+
     if (ENABLE_SERVICE_WORKER && "serviceWorker" in navigator) {
       navigator.serviceWorker.register("./sw.js").catch(() => {});
     }
@@ -308,4 +420,5 @@ async function init() {
     showFatalError(err?.message || "ไม่สามารถเริ่มต้นระบบได้");
   }
 }
+
 init();
