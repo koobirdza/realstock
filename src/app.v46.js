@@ -146,7 +146,7 @@ function setupAdminToolsVisibility() {
 async function loadCatalogForMode(mode, force = false) {
   if (force) clearApiCache(`catalog::${mode}`);
 
-  const result = await getCatalog(mode);
+  const result = await getCatalog(mode, force);
   if (!result?.ok) throw new Error(result?.message || "โหลดรายการไม่สำเร็จ");
 
   state.catalogs[mode] = result.catalog_tree || {};
