@@ -1,4 +1,10 @@
-import { AUTOSAVE_DEBOUNCE_MS, ENABLE_SERVICE_WORKER, SAVE_TIMEOUT_MS } from "./config.v46.js";
+import {
+  AUTOSAVE_DEBOUNCE_MS,
+  ENABLE_SERVICE_WORKER,
+  SAVE_TIMEOUT_MS,
+  ADMIN_MODE,
+  ENABLE_DRAFT_FEATURES
+} from "./config.v46.js";
 import { restoreSession, saveSession, clearSession } from "./auth.v46.js";
 import { saveDraft, clearDraft, readDraft } from "./store.v46.js";
 import { state, resetNavigation, setEmployee, setMode } from "./state.v46.js";
@@ -35,11 +41,10 @@ import {
 import { debounce } from "./utils.v46.js";
 
 let saveInFlight = false;
-let backgroundRefreshInFlight = false;
 let autosaveBound = false;
 
-const STOCK_TTL_MS = 45 * 1000;
-const ORDER_TTL_MS = 45 * 1000;
+const STOCK_TTL_MS = 60 * 1000;
+const ORDER_TTL_MS = 60 * 1000;
 
 const runtimeCache = {
   stockLoadedAt: 0,
@@ -64,6 +69,11 @@ function isFresh(timestamp, ttlMs) {
 }
 
 function updateDraftBadge() {
+  if (!ENABLE_DRAFT_FEATURES) {
+    setDraftBadge("");
+    return;
+  }
+
   const draft = readDraft();
   if (draft?.savedAt) {
     setDraftBadge("มีข้อมูลค้าง: " + new Date(draft.savedAt).toLocaleString("th-TH"));
@@ -73,6 +83,8 @@ function updateDraftBadge() {
 }
 
 const autosaveDraft = debounce(() => {
+  if (!ENABLE_DRAFT_FEATURES) return;
+
   const inputs = [...document.querySelectorAll("[data-qty-index]")]
     .map((el) => ({ index: Number(el.dataset.qtyIndex), value: el.value }))
     .filter((x) => x.value !== "");
@@ -95,7 +107,7 @@ const autosaveDraft = debounce(() => {
 }, AUTOSAVE_DEBOUNCE_MS);
 
 function attachAutosaveDelegation() {
-  if (autosaveBound) return;
+  if (autosaveBound || !ENABLE_DRAFT_FEATURES) return;
   autosaveBound = true;
 
   document.addEventListener("input", (e) => {
@@ -106,6 +118,29 @@ function attachAutosaveDelegation() {
     clearInlineError();
     autosaveDraft();
   });
+}
+
+function setupAdminToolsVisibility() {
+  const el = dom();
+
+  const adminNodes = [
+    el.healthCheckBtn,
+    el.dailySnapshotBtn,
+    el.refreshLineSummaryBtn,
+    el.previewLineSummaryBtn,
+    el.sendLineSummaryBtn,
+    el.testLineOABtn,
+    el.exportDebugBtn,
+    el.exportTargetsBtn
+  ].filter(Boolean);
+
+  adminNodes.forEach((node) => {
+    node.style.display = ADMIN_MODE ? "" : "none";
+  });
+
+  if (el.systemToolsCard) {
+    el.systemToolsCard.style.display = ADMIN_MODE ? "" : "none";
+  }
 }
 
 async function loadCatalogForMode(mode, force = false) {
@@ -127,7 +162,7 @@ async function ensureCatalogLoaded(mode) {
 async function loadStockSummary(force = false) {
   if (force) clearApiCache("currentStock::");
 
-  const result = await getCurrentStockSummary();
+  const result = await getCurrentStockSummary(force);
   if (!result?.ok) throw new Error(result?.message || "โหลดสรุปสต๊อกไม่สำเร็จ");
 
   state.stockSummary = result.stock || {};
@@ -137,7 +172,7 @@ async function loadStockSummary(force = false) {
 async function loadOrderViewData(force = false) {
   if (force) clearApiCache("orderView::");
 
-  const result = await getOrderView();
+  const result = await getOrderView(force);
   if (!result?.ok) throw new Error(result?.message || "โหลดรายการสั่งของไม่สำเร็จ");
 
   state.orderRows = result.rows || [];
@@ -150,6 +185,10 @@ function hasFreshStockSummary() {
 
 function hasFreshOrderView() {
   return Array.isArray(state.orderRows) && state.orderRows.length > 0 && isFresh(runtimeCache.orderLoadedAt, ORDER_TTL_MS);
+}
+
+function shouldUseStockData(mode) {
+  return mode === "count" || mode === "issue" || mode === "receive";
 }
 
 function renderAll() {
@@ -171,15 +210,8 @@ function renderAll() {
         renderAll();
       },
       onSave: handleSave,
-      onClear: () => {
-        document.querySelectorAll("[data-qty-index]").forEach((el) => {
-          el.value = "";
-        });
-        clearDraft();
-        updateDraftBadge();
-        toast("ล้างค่าในฟอร์มแล้ว", "info");
-      },
-      onRestoreDraft: restoreDraftIntoForm
+      onClear: null,
+      onRestoreDraft: null
     },
     state.stockSummary,
     state.orderRows
@@ -200,48 +232,21 @@ async function refreshHealth() {
   }
 }
 
-function shouldUseStockData(mode) {
-  return mode === "count" || mode === "issue" || mode === "receive";
-}
-
-async function refreshModeDataInBackground(mode, force = false) {
-  if (backgroundRefreshInFlight) return;
-  backgroundRefreshInFlight = true;
-
-  try {
-    if (mode === "order") {
-      await loadOrderViewData(force);
-    } else if (shouldUseStockData(mode)) {
-      await loadStockSummary(force);
-    }
-
-    if (state.mode === mode) {
-      renderAll();
-    }
-  } catch (err) {
-    if (state.mode === mode) {
-      showInlineError(err?.message || "โหลดข้อมูลไม่สำเร็จ");
-    }
-  } finally {
-    backgroundRefreshInFlight = false;
-  }
-}
-
 async function prepareMode(mode) {
   setMode(mode);
   clearInlineError();
 
   await ensureCatalogLoaded(mode);
-
-  const hasUsableCache =
-    mode === "order" ? hasFreshOrderView() : shouldUseStockData(mode) ? hasFreshStockSummary() : true;
-
   renderAll();
 
-  if (hasUsableCache) {
-    refreshModeDataInBackground(mode, false);
-    return;
-  }
+  const hasUsableCache =
+    mode === "order"
+      ? hasFreshOrderView()
+      : shouldUseStockData(mode)
+      ? hasFreshStockSummary()
+      : true;
+
+  if (hasUsableCache) return;
 
   try {
     if (mode === "order") {
@@ -281,27 +286,27 @@ function downloadTextFile(filename, text, mimeType = "text/plain;charset=utf-8")
 function bindEvents() {
   const el = dom();
 
-  el.loginBtn.addEventListener("click", handleLogin);
-  el.logoutBtn.addEventListener("click", handleLogout);
+  el.loginBtn?.addEventListener("click", handleLogin);
+  el.logoutBtn?.addEventListener("click", handleLogout);
 
-  el.countModeBtn.addEventListener("click", async () => prepareMode("count"));
-  el.issueModeBtn.addEventListener("click", async () => prepareMode("issue"));
-  el.orderModeBtn.addEventListener("click", async () => prepareMode("order"));
-  el.receiveModeBtn.addEventListener("click", async () => prepareMode("receive"));
+  el.countModeBtn?.addEventListener("click", async () => prepareMode("count"));
+  el.issueModeBtn?.addEventListener("click", async () => prepareMode("issue"));
+  el.orderModeBtn?.addEventListener("click", async () => prepareMode("order"));
+  el.receiveModeBtn?.addEventListener("click", async () => prepareMode("receive"));
 
-  el.homeBtn.addEventListener("click", () => {
+  el.homeBtn?.addEventListener("click", () => {
     resetNavigation();
     clearInlineError();
     renderAll();
   });
 
-  el.backBtn.addEventListener("click", () => {
+  el.backBtn?.addEventListener("click", () => {
     if (state.path.length) state.path.pop();
     clearInlineError();
     renderAll();
   });
 
-  el.employeeName.addEventListener("keydown", (e) => {
+  el.employeeName?.addEventListener("keydown", (e) => {
     if (e.key === "Enter") handleLogin();
   });
 
@@ -418,6 +423,8 @@ function handleLogin() {
   clearInlineError();
   renderAll();
   toast("เข้าสู่ระบบแล้ว", "success");
+
+  warmupCoreData();
 }
 
 function handleLogout() {
@@ -429,34 +436,6 @@ function handleLogout() {
   clearInlineError();
   renderAll();
   toast("ออกจากระบบแล้ว", "info");
-}
-
-function restoreDraftIntoForm() {
-  const draft = readDraft();
-  const payload = draft?.payload?.[0];
-
-  if (!payload?.inputs?.length) {
-    toast("ไม่พบข้อมูลค้าง", "warn");
-    return;
-  }
-
-  const meta = payload.meta || {};
-
-  if (meta.mode && meta.mode !== state.mode) {
-    showInlineError("ข้อมูลค้างเป็นคนละโหมด กรุณาเลือกโหมดให้ตรงก่อนกู้ข้อมูล");
-    return;
-  }
-
-  const inputs = [...document.querySelectorAll("[data-qty-index]")];
-
-  payload.inputs.forEach((saved) => {
-    const input = inputs.find(
-      (inputEl) => Number(inputEl.dataset.qtyIndex) === Number(saved.index)
-    );
-    if (input) input.value = saved.value;
-  });
-
-  toast("กู้ค่าค้างกลับมาแล้ว", "success");
 }
 
 async function handleSave() {
@@ -474,19 +453,20 @@ async function handleSave() {
 
     const records = collectRecords(currentCatalogTree(), inputRows);
 
-    saveDraft([
-      {
-        meta: {
-          employee: state.employee,
-          mode: state.mode,
-          path: [...state.path],
-          destination: state.destination
-        },
-        inputs: inputRows.filter((x) => x.value !== "")
-      }
-    ]);
-
-    updateDraftBadge();
+    if (ENABLE_DRAFT_FEATURES) {
+      saveDraft([
+        {
+          meta: {
+            employee: state.employee,
+            mode: state.mode,
+            path: [...state.path],
+            destination: state.destination
+          },
+          inputs: inputRows.filter((x) => x.value !== "")
+        }
+      ]);
+      updateDraftBadge();
+    }
 
     const result = await submitRecords(records, SAVE_TIMEOUT_MS);
     if (!result?.ok) throw new Error(result?.message || "บันทึกไม่สำเร็จ");
@@ -505,9 +485,8 @@ async function handleSave() {
 
     if (state.mode === "order") {
       await loadOrderViewData(true);
-    } else {
+    } else if (shouldUseStockData(state.mode)) {
       await loadStockSummary(true);
-      await loadOrderViewData(true);
     }
 
     renderAll();
@@ -523,28 +502,29 @@ async function warmupCoreData() {
   try {
     if (!state.employee) return;
 
-    const tasks = [];
-
-    if (!state.catalogs.count) tasks.push(ensureCatalogLoaded("count"));
-    if (!state.catalogs.issue) tasks.push(ensureCatalogLoaded("issue"));
-    if (!state.catalogs.receive) tasks.push(ensureCatalogLoaded("receive"));
-    if (!state.catalogs.order) tasks.push(ensureCatalogLoaded("order"));
-
-    if (!hasFreshStockSummary()) tasks.push(loadStockSummary(false));
-    if (!hasFreshOrderView()) tasks.push(loadOrderViewData(false));
-
-    if (tasks.length) {
-      await Promise.allSettled(tasks);
-      if (state.mode) renderAll();
+    if (!state.catalogs.count) {
+      await ensureCatalogLoaded("count");
     }
+
+    if (!hasFreshStockSummary()) {
+      loadStockSummary(false).catch(() => {});
+    }
+
+    setTimeout(() => {
+      ensureCatalogLoaded("issue").catch(() => {});
+      ensureCatalogLoaded("receive").catch(() => {});
+      ensureCatalogLoaded("order").catch(() => {});
+      if (!hasFreshOrderView()) loadOrderViewData(false).catch(() => {});
+    }, 800);
   } catch (_) {
-    // intentionally silent
+    // silent
   }
 }
 
 async function init() {
   try {
     bindDom();
+    setupAdminToolsVisibility();
     restoreSession();
     updateDraftBadge();
     attachAutosaveDelegation();
