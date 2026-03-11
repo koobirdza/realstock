@@ -143,6 +143,34 @@ function setupAdminToolsVisibility() {
   }
 }
 
+function setSaveButtonState(isSaving) {
+  const btn = document.getElementById("saveBtn");
+  if (!btn) return;
+
+  if (isSaving) {
+    btn.disabled = true;
+    btn.dataset.originalText = btn.dataset.originalText || btn.textContent || "บันทึก";
+    btn.textContent = "กำลังบันทึก...";
+    btn.classList.add("opacity-60", "cursor-not-allowed");
+  } else {
+    btn.disabled = false;
+    btn.textContent = btn.dataset.originalText || "บันทึก";
+    btn.classList.remove("opacity-60", "cursor-not-allowed");
+  }
+}
+
+function navigateBackToSubcategorySelection() {
+  if (!Array.isArray(state.path) || !state.path.length) {
+    resetNavigation();
+    return;
+  }
+
+  // เด้งกลับไปหน้าเลือกหมวดย่อยของหมวดหลัก
+  // เช่น [stock, kitchen, sauce] -> [stock]
+  state.path = [state.path[0]];
+  state.destination = "";
+}
+
 async function loadCatalogForMode(mode, force = false) {
   if (force) clearApiCache(`catalog::${mode}`);
 
@@ -203,10 +231,12 @@ function renderAll() {
       catalogTree: currentCatalogTree(),
       onOpenChild: (key) => {
         state.path.push(key);
+        clearInlineError();
         renderAll();
       },
       onPickDestination: (dest) => {
         state.destination = dest;
+        clearInlineError();
         renderAll();
       },
       onSave: handleSave,
@@ -257,6 +287,7 @@ async function prepareMode(mode) {
     renderAll();
   } catch (err) {
     showInlineError(err?.message || "โหลดข้อมูลไม่สำเร็จ");
+    toast(err?.message || "โหลดข้อมูลไม่สำเร็จ", "error", 3500);
   }
 }
 
@@ -316,6 +347,7 @@ function bindEvents() {
       toast("เช็กเซิร์ฟเวอร์เสร็จแล้ว", "success");
     } catch (err) {
       showInlineError(err?.message || "เช็กเซิร์ฟเวอร์ไม่สำเร็จ");
+      toast(err?.message || "เช็กเซิร์ฟเวอร์ไม่สำเร็จ", "error", 3500);
     }
   });
 
@@ -327,6 +359,7 @@ function bindEvents() {
       toast(snapshotText(result), "success", 5500);
     } catch (err) {
       showInlineError(err?.message || "ดึงภาพรวมไม่สำเร็จ");
+      toast(err?.message || "ดึงภาพรวมไม่สำเร็จ", "error", 3500);
     }
   });
 
@@ -351,6 +384,7 @@ function bindEvents() {
       if (state.mode) renderAll();
     } catch (err) {
       showInlineError(err?.message || "รีเฟรช LINE Summary ไม่สำเร็จ");
+      toast(err?.message || "รีเฟรช LINE Summary ไม่สำเร็จ", "error", 3500);
     }
   });
 
@@ -362,6 +396,7 @@ function bindEvents() {
       toast("Preview LINE พร้อมแล้ว", "success", 3000);
     } catch (err) {
       showInlineError(err?.message || "Preview LINE ไม่สำเร็จ");
+      toast(err?.message || "Preview LINE ไม่สำเร็จ", "error", 3500);
     }
   });
 
@@ -373,6 +408,7 @@ function bindEvents() {
       toast("ส่ง LINE สรุปสำเร็จ", "success", 4000);
     } catch (err) {
       showInlineError(err?.message || "ส่ง LINE สรุปไม่สำเร็จ");
+      toast(err?.message || "ส่ง LINE สรุปไม่สำเร็จ", "error", 3500);
     }
   });
 
@@ -384,6 +420,7 @@ function bindEvents() {
       toast("ส่งข้อความทดสอบ LINE OA สำเร็จ", "success", 4000);
     } catch (err) {
       showInlineError(err?.message || "ทดสอบ LINE OA ไม่สำเร็จ");
+      toast(err?.message || "ทดสอบ LINE OA ไม่สำเร็จ", "error", 3500);
     }
   });
 
@@ -395,6 +432,7 @@ function bindEvents() {
       toast(`Export Debug สำเร็จ • ${(result.rows || []).length} rows`, "success", 3500);
     } catch (err) {
       showInlineError(err?.message || "Export Debug ไม่สำเร็จ");
+      toast(err?.message || "Export Debug ไม่สำเร็จ", "error", 3500);
     }
   });
 
@@ -406,6 +444,7 @@ function bindEvents() {
       toast(`Export Target IDs สำเร็จ • ${(result.rows || []).length} rows`, "success", 3500);
     } catch (err) {
       showInlineError(err?.message || "Export Target IDs ไม่สำเร็จ");
+      toast(err?.message || "Export Target IDs ไม่สำเร็จ", "error", 3500);
     }
   });
 }
@@ -415,6 +454,7 @@ function handleLogin() {
 
   if (!name) {
     showInlineError("กรุณากรอกชื่อพนักงานก่อนเข้าสู่ระบบ");
+    toast("กรุณากรอกชื่อพนักงานก่อนเข้าสู่ระบบ", "warn", 3000);
     return;
   }
 
@@ -439,12 +479,17 @@ function handleLogout() {
 }
 
 async function handleSave() {
-  if (saveInFlight) return;
+  if (saveInFlight) {
+    toast("กำลังบันทึกอยู่ กรุณารอสักครู่", "warn", 2500);
+    return;
+  }
 
   saveInFlight = true;
+  setSaveButtonState(true);
 
   try {
     clearInlineError();
+    toast("กำลังบันทึกข้อมูล...", "info", 1800);
 
     const inputRows = [...document.querySelectorAll("[data-qty-index]")].map((el) => ({
       index: Number(el.dataset.qtyIndex),
@@ -474,27 +519,27 @@ async function handleSave() {
     clearDraft();
     updateDraftBadge();
 
-    document.querySelectorAll("[data-qty-index]").forEach((el) => {
-      el.value = "";
-    });
-
     runtimeCache.stockLoadedAt = 0;
     runtimeCache.orderLoadedAt = 0;
     clearApiCache("currentStock::");
     clearApiCache("orderView::");
 
-    if (state.mode === "order") {
-      await loadOrderViewData(true);
-    } else if (shouldUseStockData(state.mode)) {
+    if (shouldUseStockData(state.mode)) {
       await loadStockSummary(true);
+    } else if (state.mode === "order") {
+      await loadOrderViewData(true);
     }
 
+    navigateBackToSubcategorySelection();
     renderAll();
-    toast(`บันทึกสำเร็จ • ${result.saved || 0} รายการ`, "success", 4500);
+
+    toast(`บันทึกสำเร็จ • ${result.saved || records.length || 0} รายการ`, "success", 3500);
   } catch (err) {
     showInlineError(err?.message || "เกิดข้อผิดพลาดระหว่างบันทึก");
+    toast(err?.message || "บันทึกไม่สำเร็จ", "error", 4000);
   } finally {
     saveInFlight = false;
+    setSaveButtonState(false);
   }
 }
 
