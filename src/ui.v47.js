@@ -1,7 +1,7 @@
-import { APP_VERSION, ISSUE_DESTINATIONS } from "./config.v46.js";
-import { state } from "./state.v46.js";
-import { getChildren, getItems, getPathLabels, needsDestination, getModeMeta } from "./catalog.v46.js";
-import { escapeHtml, qs } from "./utils.v46.js";
+import { APP_VERSION, ISSUE_DESTINATIONS } from "./config.v47.js";
+import { state } from "./state.v47.js";
+import { getChildren, getItems, getPathLabels, needsDestination, getModeMeta } from "./catalog.v47.js";
+import { escapeHtml, qs } from "./utils.v47.js";
 
 const els = {};
 
@@ -10,6 +10,7 @@ function badge(color) {
     green: "bg-emerald-200 border-emerald-600 text-emerald-950",
     blue: "bg-blue-200 border-blue-600 text-blue-950",
     orange: "bg-orange-200 border-orange-600 text-orange-950",
+    amber: "bg-amber-200 border-amber-600 text-amber-950",
     slate: "bg-slate-200 border-slate-400 text-slate-900"
   };
   return map[color] || map.slate;
@@ -20,10 +21,9 @@ export function bindDom() {
     "versionLabel", "healthBadge", "fatalError", "errorPanel", "toast", "draftBadge",
     "loginPage", "appPage", "employeeName", "loginBtn", "employeeDisplay", "logoutBtn",
     "countModeBtn", "issueModeBtn", "orderModeBtn", "receiveModeBtn", "currentModeBadge",
-    "navPanel", "breadcrumb", "homeBtn", "backBtn", "destinationWrap", "destinationButtons",
-    "nodeList", "itemPanel", "healthCheckBtn", "dailySnapshotBtn", "refreshLineSummaryBtn",
-    "previewLineSummaryBtn", "sendLineSummaryBtn", "testLineOABtn", "exportDebugBtn",
-    "exportTargetsBtn", "systemToolsCard"
+    "navPanel", "breadcrumb", "homeBtn", "backBtn",
+    "destinationWrap", "destinationButtons",
+    "nodeList", "itemPanel"
   ].forEach((id) => {
     const found = document.getElementById(id);
     if (found) els[id] = found;
@@ -110,31 +110,36 @@ function renderOrder(rows) {
     return;
   }
 
-  els.itemPanel.innerHTML = `<div class="rounded-2xl border border-slate-300 overflow-hidden bg-white shadow-sm">
-    <div class="px-4 py-3 bg-slate-900 text-white font-semibold">รายการที่ควรสั่งสำหรับวันถัดไป</div>
-    <div class="overflow-auto">
-      <table class="min-w-full text-sm">
-        <thead class="bg-slate-100 text-slate-800">
-          <tr>
-            <th class="text-left px-4 py-3">รายการ</th>
-            <th class="text-left px-4 py-3">คงเหลือ</th>
-            <th class="text-left px-4 py-3">ขั้นต่ำพรุ่งนี้</th>
-            <th class="text-left px-4 py-3">ควรสั่ง</th>
-            <th class="text-left px-4 py-3">ชนิดวันพรุ่งนี้</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${rows.map((row) => `<tr class="border-t border-slate-200">
-            <td class="px-4 py-3"><div class="font-semibold">${escapeHtml(row.item_name || "")}</div><div class="text-xs text-slate-500">${escapeHtml(row.unit || "")}</div></td>
-            <td class="px-4 py-3">${escapeHtml(row.qty_remaining_today ?? "-")}</td>
-            <td class="px-4 py-3">ขั้นต่ำ ${escapeHtml(row.target_par_for_tomorrow ?? "-")}</td>
-            <td class="px-4 py-3"><span class="font-semibold text-orange-700">${escapeHtml(row.suggested_order_qty ?? "-")}</span></td>
-            <td class="px-4 py-3">${escapeHtml(row.tomorrow_type || "-")}</td>
-          </tr>`).join("")}
-        </tbody>
-      </table>
+  els.itemPanel.innerHTML = `
+    <div class="rounded-2xl border border-slate-300 overflow-hidden bg-white shadow-sm">
+      <div class="px-4 py-3 bg-slate-900 text-white font-semibold">รายการที่ควรสั่งสำหรับวันถัดไป</div>
+      <div class="overflow-auto">
+        <table class="min-w-full text-sm">
+          <thead class="bg-slate-100 text-slate-800">
+            <tr>
+              <th class="text-left px-4 py-3">รายการ</th>
+              <th class="text-left px-4 py-3">คงเหลือ</th>
+              <th class="text-left px-4 py-3">ขั้นต่ำพรุ่งนี้</th>
+              <th class="text-left px-4 py-3">ควรสั่ง</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows.map((row) => `
+              <tr class="border-t border-slate-200">
+                <td class="px-4 py-3">
+                  <div class="font-semibold">${escapeHtml(row.item_name || "")}</div>
+                  <div class="text-xs text-slate-500">${escapeHtml(row.unit || "")}</div>
+                </td>
+                <td class="px-4 py-3">${escapeHtml(row.qty_remaining_today ?? "-")}</td>
+                <td class="px-4 py-3">${escapeHtml(row.target_par_for_tomorrow ?? "-")}</td>
+                <td class="px-4 py-3"><span class="font-semibold text-orange-700">${escapeHtml(row.suggested_order_qty ?? "-")}</span></td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      </div>
     </div>
-  </div>`;
+  `;
 }
 
 function renderInputs(items, handlers, stockSummary = {}) {
@@ -159,32 +164,38 @@ function renderInputs(items, handlers, stockSummary = {}) {
       ? "blue"
       : "orange";
 
-  els.itemPanel.innerHTML = `<div class="space-y-3">${items.map((item, idx) => {
-    const summary = stockSummary[item.item_key] || {};
-    const hasStock = summary.current_stock !== undefined && summary.current_stock !== null && summary.current_stock !== "";
-    const stockLine = hasStock ? `คงเหลือ ${escapeHtml(summary.current_stock)} ${escapeHtml(summary.unit || item.unit || "")}` : "คงเหลือ -";
-    const lowBadge = summary.status === "LOW" ? '<span class="inline-block mt-2 text-xs px-2 py-1 rounded-full bg-red-100 text-red-700">ต่ำกว่าขั้นต่ำ</span>' : "";
+  els.itemPanel.innerHTML = `
+    <div class="space-y-3">
+      ${items.map((item, idx) => {
+        const summary = stockSummary[item.item_key] || {};
+        const stockValue = summary.current_stock ?? "-";
+        const unit = summary.unit || item.unit || "";
+        const minStock = summary.min_stock ?? "";
+        const low = Number(stockValue) <= Number(minStock) && stockValue !== "-";
 
-    return `<div class="rounded-2xl border border-slate-300 p-4 bg-white shadow-sm">
-      <div class="flex items-start justify-between gap-3 flex-wrap">
-        <div class="min-w-[220px] flex-1">
-          <div class="font-semibold">${idx + 1}. ${escapeHtml(item.item_name)}</div>
-          <div class="text-sm text-slate-600">แบรนด์: ${escapeHtml(item.brand || "-")}</div>
-          <div class="text-sm text-slate-600">หน่วย: ${escapeHtml(item.unit || "-")} • ประเภท: ${escapeHtml(item.item_type || "-")}</div>
-          <div class="text-sm text-slate-700 mt-1">${stockLine}</div>
-          ${lowBadge}
-        </div>
-        <div class="w-full sm:w-48">
-          <input data-qty-index="${idx}" type="number" min="0" step="any" inputmode="decimal" class="w-full border rounded-2xl px-4 py-3 bg-white" placeholder="${hint}" />
-        </div>
-      </div>
-    </div>`;
-  }).join("")}</div>
-  <div class="sticky-bottom mt-4 border border-slate-300 rounded-2xl p-3 flex gap-2 flex-wrap bg-white shadow-md">
-    <button id="saveBtn" class="px-6 py-3 rounded-2xl bg-${modeColor}-800 text-white font-semibold shadow-md">${saveLabel}</button>
-  </div>`;
+        return `
+          <div class="rounded-2xl border border-slate-300 p-4 bg-white shadow-sm">
+            <div class="flex items-start justify-between gap-3 flex-wrap">
+              <div class="min-w-[220px] flex-1">
+                <div class="font-semibold">${idx + 1}. ${escapeHtml(item.item_name)}</div>
+                <div class="text-sm text-slate-600">แบรนด์: ${escapeHtml(item.brand || "-")}</div>
+                <div class="text-sm text-slate-700 mt-1">คงเหลือ ${escapeHtml(stockValue)} ${escapeHtml(unit)}</div>
+                ${low ? '<span class="inline-block mt-2 text-xs px-2 py-1 rounded-full bg-red-100 text-red-700">ต่ำกว่าขั้นต่ำ</span>' : ""}
+              </div>
+              <div class="w-full sm:w-48">
+                <input data-qty-index="${idx}" type="number" min="0" step="any" inputmode="decimal" class="w-full border rounded-2xl px-4 py-3 bg-white" placeholder="${hint}" />
+              </div>
+            </div>
+          </div>
+        `;
+      }).join("")}
+    </div>
+    <div class="sticky-bottom mt-4 border border-slate-300 rounded-2xl p-3 flex gap-2 flex-wrap bg-white shadow-md">
+      <button id="saveBtn" class="px-6 py-3 rounded-2xl bg-${modeColor}-800 text-white font-semibold shadow-md">${saveLabel}</button>
+    </div>
+  `;
 
-  qs("saveBtn").addEventListener("click", handlers.onSave);
+  qs("saveBtn")?.addEventListener("click", handlers.onSave);
 }
 
 export function renderNavigation(node, handlers, stockSummary = {}, orderRows = []) {
@@ -197,8 +208,17 @@ export function renderNavigation(node, handlers, stockSummary = {}, orderRows = 
   if (children.length) {
     els.nodeList.classList.remove("hidden");
     els.itemPanel.classList.add("hidden");
-    els.nodeList.innerHTML = children.map((child) => `<button data-node="${escapeHtml(child.key)}" class="text-left border border-slate-400 rounded-2xl p-4 bg-white hover:border-slate-700 hover:shadow-lg"><div class="text-xl mb-1">${escapeHtml(child.icon || "📦")}</div><div class="font-semibold">${escapeHtml(child.label || child.key)}</div></button>`).join("");
-    els.nodeList.querySelectorAll("[data-node]").forEach((btn) => btn.addEventListener("click", () => handlers.onOpenChild(btn.dataset.node)));
+
+    els.nodeList.innerHTML = children.map((child) => `
+      <button data-node="${escapeHtml(child.key)}" class="text-left border border-slate-400 rounded-2xl p-4 bg-white hover:border-slate-700 hover:shadow-lg">
+        <div class="text-xl mb-1">${escapeHtml(child.icon || "📦")}</div>
+        <div class="font-semibold">${escapeHtml(child.label || child.key)}</div>
+      </button>
+    `).join("");
+
+    els.nodeList.querySelectorAll("[data-node]").forEach((btn) => {
+      btn.addEventListener("click", () => handlers.onOpenChild(btn.dataset.node));
+    });
     return;
   }
 
