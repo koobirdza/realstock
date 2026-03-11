@@ -2,13 +2,50 @@ import { AUTOSAVE_DEBOUNCE_MS, ENABLE_SERVICE_WORKER, SAVE_TIMEOUT_MS } from "./
 import { restoreSession, saveSession, clearSession } from "./auth.v46.js";
 import { saveDraft, clearDraft, readDraft } from "./store.v46.js";
 import { state, resetNavigation, setEmployee, setMode } from "./state.v46.js";
-import { bindDom, dom, renderMode, renderNavigation, renderSession, setHealth, setDraftBadge, showFatalError, showInlineError, clearInlineError, toast } from "./ui.v46.js";
+import {
+  bindDom,
+  dom,
+  renderMode,
+  renderNavigation,
+  renderSession,
+  setHealth,
+  setDraftBadge,
+  showFatalError,
+  showInlineError,
+  clearInlineError,
+  toast
+} from "./ui.v46.js";
 import { getNodeByPath, getRootNode } from "./catalog.v46.js";
 import { collectRecords } from "./inventory.v46.js";
-import { pingServer, submitRecords, getCatalog, exportDebugLog, clearApiCache, getCurrentStockSummary, getDailySnapshot, testLineOA, exportLineTargets, getOrderView, refreshLineSummary, previewLineSummary, sendLineSummary } from "./api.v46.js";
+import {
+  pingServer,
+  submitRecords,
+  getCatalog,
+  exportDebugLog,
+  clearApiCache,
+  getCurrentStockSummary,
+  getDailySnapshot,
+  testLineOA,
+  exportLineTargets,
+  getOrderView,
+  refreshLineSummary,
+  previewLineSummary,
+  sendLineSummary
+} from "./api.v46.js";
 import { debounce } from "./utils.v46.js";
 
 let saveInFlight = false;
+let backgroundRefreshInFlight = false;
+let autosaveBound = false;
+
+const STOCK_TTL_MS = 45 * 1000;
+const ORDER_TTL_MS = 45 * 1000;
+
+const runtimeCache = {
+  stockLoadedAt: 0,
+  orderLoadedAt: 0,
+  catalogLoadedAt: {}
+};
 
 function currentCatalogTree() {
   return state.catalogs[state.mode] || {};
@@ -16,6 +53,14 @@ function currentCatalogTree() {
 
 function currentNode() {
   return getNodeByPath(currentCatalogTree(), state.path) || getRootNode(currentCatalogTree());
+}
+
+function hasObjectData(obj) {
+  return !!obj && Object.keys(obj).length > 0;
+}
+
+function isFresh(timestamp, ttlMs) {
+  return timestamp && Date.now() - timestamp < ttlMs;
 }
 
 function updateDraftBadge() {
@@ -49,19 +94,28 @@ const autosaveDraft = debounce(() => {
   updateDraftBadge();
 }, AUTOSAVE_DEBOUNCE_MS);
 
-function attachAutosave() {
-  document.querySelectorAll("[data-qty-index]").forEach((el) =>
-    el.addEventListener("input", () => {
-      clearInlineError();
-      autosaveDraft();
-    })
-  );
+function attachAutosaveDelegation() {
+  if (autosaveBound) return;
+  autosaveBound = true;
+
+  document.addEventListener("input", (e) => {
+    const target = e.target;
+    if (!(target instanceof HTMLElement)) return;
+    if (!target.matches("[data-qty-index]")) return;
+
+    clearInlineError();
+    autosaveDraft();
+  });
 }
 
-async function loadCatalogForMode(mode) {
+async function loadCatalogForMode(mode, force = false) {
+  if (force) clearApiCache(`catalog::${mode}`);
+
   const result = await getCatalog(mode);
   if (!result?.ok) throw new Error(result?.message || "โหลดรายการไม่สำเร็จ");
+
   state.catalogs[mode] = result.catalog_tree || {};
+  runtimeCache.catalogLoadedAt[mode] = Date.now();
 }
 
 async function ensureCatalogLoaded(mode) {
@@ -72,16 +126,30 @@ async function ensureCatalogLoaded(mode) {
 
 async function loadStockSummary(force = false) {
   if (force) clearApiCache("currentStock::");
+
   const result = await getCurrentStockSummary();
   if (!result?.ok) throw new Error(result?.message || "โหลดสรุปสต๊อกไม่สำเร็จ");
+
   state.stockSummary = result.stock || {};
+  runtimeCache.stockLoadedAt = Date.now();
 }
 
 async function loadOrderViewData(force = false) {
   if (force) clearApiCache("orderView::");
+
   const result = await getOrderView();
   if (!result?.ok) throw new Error(result?.message || "โหลดรายการสั่งของไม่สำเร็จ");
+
   state.orderRows = result.rows || [];
+  runtimeCache.orderLoadedAt = Date.now();
+}
+
+function hasFreshStockSummary() {
+  return hasObjectData(state.stockSummary) && isFresh(runtimeCache.stockLoadedAt, STOCK_TTL_MS);
+}
+
+function hasFreshOrderView() {
+  return Array.isArray(state.orderRows) && state.orderRows.length > 0 && isFresh(runtimeCache.orderLoadedAt, ORDER_TTL_MS);
 }
 
 function renderAll() {
@@ -97,12 +165,10 @@ function renderAll() {
       onOpenChild: (key) => {
         state.path.push(key);
         renderAll();
-        attachAutosave();
       },
       onPickDestination: (dest) => {
         state.destination = dest;
         renderAll();
-        attachAutosave();
       },
       onSave: handleSave,
       onClear: () => {
@@ -118,32 +184,75 @@ function renderAll() {
     state.stockSummary,
     state.orderRows
   );
-
-  attachAutosave();
 }
 
 async function refreshHealth() {
-  const result = await pingServer();
-  setHealth(
-    !!result?.ok,
-    result?.ok
-      ? `เซิร์ฟเวอร์พร้อม • ${result.version || ""}`
-      : `เซิร์ฟเวอร์มีปัญหา • ${result?.message || ""}`
-  );
+  try {
+    const result = await pingServer();
+    setHealth(
+      !!result?.ok,
+      result?.ok
+        ? `เซิร์ฟเวอร์พร้อม • ${result.version || ""}`
+        : `เซิร์ฟเวอร์มีปัญหา • ${result?.message || ""}`
+    );
+  } catch (err) {
+    setHealth(false, `เซิร์ฟเวอร์มีปัญหา • ${err?.message || "เชื่อมต่อไม่ได้"}`);
+  }
+}
+
+function shouldUseStockData(mode) {
+  return mode === "count" || mode === "issue" || mode === "receive";
+}
+
+async function refreshModeDataInBackground(mode, force = false) {
+  if (backgroundRefreshInFlight) return;
+  backgroundRefreshInFlight = true;
+
+  try {
+    if (mode === "order") {
+      await loadOrderViewData(force);
+    } else if (shouldUseStockData(mode)) {
+      await loadStockSummary(force);
+    }
+
+    if (state.mode === mode) {
+      renderAll();
+    }
+  } catch (err) {
+    if (state.mode === mode) {
+      showInlineError(err?.message || "โหลดข้อมูลไม่สำเร็จ");
+    }
+  } finally {
+    backgroundRefreshInFlight = false;
+  }
 }
 
 async function prepareMode(mode) {
   setMode(mode);
   clearInlineError();
+
   await ensureCatalogLoaded(mode);
 
-  if (mode === "order") {
-    await loadOrderViewData();
-  } else {
-    await loadStockSummary();
-  }
+  const hasUsableCache =
+    mode === "order" ? hasFreshOrderView() : shouldUseStockData(mode) ? hasFreshStockSummary() : true;
 
   renderAll();
+
+  if (hasUsableCache) {
+    refreshModeDataInBackground(mode, false);
+    return;
+  }
+
+  try {
+    if (mode === "order") {
+      await loadOrderViewData(false);
+    } else if (shouldUseStockData(mode)) {
+      await loadStockSummary(false);
+    }
+    renderAll();
+  } catch (err) {
+    showInlineError(err?.message || "โหลดข้อมูลไม่สำเร็จ");
+  }
 }
 
 function snapshotText(snapshot) {
@@ -223,6 +332,8 @@ function bindEvents() {
 
       clearApiCache("orderView::");
       clearApiCache("currentStock::");
+      runtimeCache.stockLoadedAt = 0;
+      runtimeCache.orderLoadedAt = 0;
 
       toast(`รีเฟรช LINE Summary สำเร็จ • ${result.row_count || 0} แถว`, "success", 4500);
 
@@ -387,6 +498,11 @@ async function handleSave() {
       el.value = "";
     });
 
+    runtimeCache.stockLoadedAt = 0;
+    runtimeCache.orderLoadedAt = 0;
+    clearApiCache("currentStock::");
+    clearApiCache("orderView::");
+
     if (state.mode === "order") {
       await loadOrderViewData(true);
     } else {
@@ -403,14 +519,43 @@ async function handleSave() {
   }
 }
 
+async function warmupCoreData() {
+  try {
+    if (!state.employee) return;
+
+    const tasks = [];
+
+    if (!state.catalogs.count) tasks.push(ensureCatalogLoaded("count"));
+    if (!state.catalogs.issue) tasks.push(ensureCatalogLoaded("issue"));
+    if (!state.catalogs.receive) tasks.push(ensureCatalogLoaded("receive"));
+    if (!state.catalogs.order) tasks.push(ensureCatalogLoaded("order"));
+
+    if (!hasFreshStockSummary()) tasks.push(loadStockSummary(false));
+    if (!hasFreshOrderView()) tasks.push(loadOrderViewData(false));
+
+    if (tasks.length) {
+      await Promise.allSettled(tasks);
+      if (state.mode) renderAll();
+    }
+  } catch (_) {
+    // intentionally silent
+  }
+}
+
 async function init() {
   try {
     bindDom();
     restoreSession();
     updateDraftBadge();
+    attachAutosaveDelegation();
     bindEvents();
-    await refreshHealth();
+
     renderAll();
+    refreshHealth();
+
+    if (state.employee) {
+      warmupCoreData();
+    }
 
     if (ENABLE_SERVICE_WORKER && "serviceWorker" in navigator) {
       navigator.serviceWorker.register("./sw.js").catch(() => {});
