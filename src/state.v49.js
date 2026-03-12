@@ -9,7 +9,10 @@ export const state = {
   orderRows: [],
   saveInFlight: false,
   lastCacheStamp: "",
-  admin: false
+  admin: false,
+  scheduleBadgeByPath: {},
+  instantReadyModes: {},
+  loadingModes: {}
 };
 export function resetNav() {
   state.path = [];
