@@ -1,4 +1,4 @@
-export const GOOGLE_SCRIPT_URL = 'PUT_YOUR_WEB_APP_EXEC_URL_HERE';
+export const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwSOEIId8C7BVTxCYwiJoSG7N7k4OSy1TfZXJyDHSD2AWSJ7NWGboHYIqMtqbqP2ISn4Q/exec';
 export const APP_VERSION = 'v48.0 Extreme Fast';
 export const CACHE_TTL = { catalog: 10 * 60 * 1000, currentStock: 5 * 60 * 1000, orderView: 2 * 60 * 1000 };
 export const SAVE_TIMEOUT_MS = 20000;
