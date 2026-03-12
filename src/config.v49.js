@@ -1,5 +1,5 @@
 export const APP_VERSION = "v49.2-instant-nav";
-export const GOOGLE_SCRIPT_URL = "PUT_YOUR_WEB_APP_EXEC_URL_HERE";
+export const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwSOEIId8C7BVTxCYwiJoSG7N7k4OSy1TfZXJyDHSD2AWSJ7NWGboHYIqMtqbqP2ISn4Q/exec";
 export const ENABLE_SERVICE_WORKER = true;
 export const CACHE_TTL = {
   catalog: 10 * 60 * 1000,
