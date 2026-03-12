@@ -1,106 +1,174 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="th">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>เจริญไทยสุกี้ • RealStock v47</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RealStock v47.2 Restaurant Build</title>
   <meta name="theme-color" content="#0f172a" />
-  <link rel="manifest" href="manifest.json" />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="manifest" href="./manifest.json" />
   <style>
-    body{font-family:'Prompt',sans-serif;background:linear-gradient(135deg,#0f172a 0%,#1e293b 45%,#334155 100%)}
-    .card{border-radius:1.25rem;box-shadow:0 12px 34px rgba(15,23,42,.25)}
-    .panel{background:rgba(255,255,255,.96);border:1px solid rgba(148,163,184,.5)}
-    .mode-count{background:linear-gradient(135deg,#14532d,#166534,#22c55e)}
-    .mode-issue{background:linear-gradient(135deg,#1e3a8a,#1d4ed8,#3b82f6)}
-    .mode-order{background:linear-gradient(135deg,#7c2d12,#c2410c,#fb923c)}
-    .mode-receive{background:linear-gradient(135deg,#78350f,#b45309,#f59e0b)}
-    .nav-btn{background:#334155;color:#fff;font-weight:600}
-    .sticky-bottom{position:sticky;bottom:0;background:rgba(255,255,255,.96)}
+    :root {
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #cbd5e1;
+      --primary: #0f172a;
+      --count: #047857;
+      --issue: #1d4ed8;
+      --receive: #c2410c;
+      --order: #7c3aed;
+      --danger: #dc2626;
+      --warning: #d97706;
+      --shadow: 0 8px 28px rgba(15, 23, 42, .08);
+      --radius: 18px;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg); color: var(--text); }
+    .hidden { display: none !important; }
+    .app-shell { max-width: 1080px; margin: 0 auto; padding: 16px; }
+    .topbar { display:flex; gap:12px; align-items:center; justify-content:space-between; margin-bottom:16px; }
+    .brand { font-weight: 800; font-size: 20px; }
+    .muted { color: var(--muted); }
+    .card { background: var(--card); border:1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); }
+    .p16 { padding: 16px; }
+    .p20 { padding: 20px; }
+    .stack { display:grid; gap:12px; }
+    .grid { display:grid; gap:12px; }
+    .grid.cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid.cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .grid.cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .btn { appearance:none; border:none; border-radius: 16px; padding: 13px 16px; font-weight:700; cursor:pointer; background:#e2e8f0; color:var(--text); transition:.15s ease; }
+    .btn:hover { transform: translateY(-1px); }
+    .btn:disabled { opacity:.55; cursor:not-allowed; transform:none; }
+    .btn-primary { background: var(--primary); color:#fff; }
+    .btn-count { background: var(--count); color:#fff; }
+    .btn-issue { background: var(--issue); color:#fff; }
+    .btn-receive { background: var(--receive); color:#fff; }
+    .btn-order { background: var(--order); color:#fff; }
+    .btn-ghost { background:#fff; border:1px solid var(--border); }
+    .btn-danger { background: var(--danger); color:#fff; }
+    input { width:100%; padding: 13px 14px; border-radius: 14px; border:1px solid var(--border); background:#fff; font: inherit; }
+    .header-row { display:flex; justify-content:space-between; gap:12px; align-items:center; flex-wrap: wrap; }
+    .badge { display:inline-flex; align-items:center; gap:6px; padding:7px 12px; border-radius: 999px; font-size: 13px; font-weight:700; border:1px solid transparent; }
+    .badge-slate { background:#e2e8f0; color:#0f172a; }
+    .badge-green { background:#d1fae5; color:#065f46; }
+    .badge-blue { background:#dbeafe; color:#1e40af; }
+    .badge-orange { background:#ffedd5; color:#9a3412; }
+    .badge-purple { background:#ede9fe; color:#6d28d9; }
+    .breadcrumb { font-size: 14px; color: var(--muted); }
+    .list { display:grid; gap:12px; }
+    .nav-btn { text-align:left; padding:16px; border-radius:18px; border:1px solid var(--border); background:#fff; cursor:pointer; font-weight:700; }
+    .nav-btn small { display:block; color:var(--muted); font-weight:500; margin-top:4px; }
+    .item-row { display:grid; grid-template-columns: 1fr 140px; gap:12px; align-items:center; padding:16px; border:1px solid var(--border); border-radius:18px; }
+    .item-name { font-weight:700; }
+    .item-sub { color:var(--muted); font-size: 13px; margin-top:4px; }
+    .sticky-action { position: sticky; bottom: 10px; z-index: 20; background: rgba(248,250,252,.85); backdrop-filter: blur(8px); padding-top: 10px; }
+    .toolbar { display:flex; gap:10px; flex-wrap:wrap; }
+    .toast-wrap { position: fixed; top: 14px; right: 14px; z-index: 9999; display:grid; gap:10px; }
+    .toast { min-width: 220px; max-width: 340px; color:#fff; padding: 12px 14px; border-radius: 16px; box-shadow: var(--shadow); font-weight:700; }
+    .toast.info { background:#334155; }
+    .toast.success { background:#059669; }
+    .toast.error { background:#dc2626; }
+    .toast.warn { background:#d97706; }
+    .status-line { font-size: 13px; color: var(--muted); }
+    .loading { opacity: .75; }
+    .skeleton { position:relative; overflow:hidden; background:#e2e8f0; min-height: 56px; border-radius: 16px; }
+    .skeleton::after { content:""; position:absolute; inset:0; transform: translateX(-100%); background: linear-gradient(90deg, transparent, rgba(255,255,255,.7), transparent); animation: shimmer 1.2s infinite; }
+    @keyframes shimmer { 100% { transform: translateX(100%); } }
+    .admin { border-top:1px dashed var(--border); padding-top:16px; margin-top:16px; }
+    .footer-note { margin-top: 16px; font-size: 12px; color: var(--muted); }
+    .chip-row { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+    .chip { appearance:none; border:1px solid var(--border); background:#fff; color:var(--text); border-radius:999px; padding:7px 10px; font:inherit; font-size:12px; font-weight:700; cursor:pointer; }
+    .chip-fill { background:#ede9fe; border-color:#c4b5fd; color:#6d28d9; }
+    .mode-count { border-color:#a7f3d0; }
+    .mode-issue { border-color:#bfdbfe; }
+    .mode-receive { border-color:#fdba74; }
+    .mode-order { border-color:#d8b4fe; }
+
+    @media (max-width: 760px) {
+      .grid.cols-4, .grid.cols-3, .grid.cols-2 { grid-template-columns: 1fr; }
+      .item-row { grid-template-columns: 1fr; }
+      .app-shell { padding: 12px; }
+    }
   </style>
 </head>
-<body class="min-h-screen text-slate-900">
-  <div class="max-w-7xl mx-auto p-4 md:p-6">
-    <div class="flex items-center justify-between gap-4 mb-5">
+<body>
+  <div id="toastWrap" class="toast-wrap"></div>
+  <div class="app-shell">
+    <div class="topbar">
       <div>
-        <h1 class="text-2xl md:text-3xl font-bold text-white">🍲 ระบบเช็คสต๊อก • เจริญไทยสุกี้</h1>
-        <p class="text-sm text-slate-300">Inventory Plus v47 • Clean Optimized • Fast Mode Switching</p>
+        <div class="brand">RealStock Restaurant <span id="versionLabel" class="muted"></span></div>
+        <div id="healthLabel" class="status-line">Checking server...</div>
       </div>
-      <div class="text-xs text-right text-slate-300">
-        <div id="versionLabel"></div>
-        <div id="healthBadge">กำลังตรวจสอบเซิร์ฟเวอร์...</div>
-        <div id="draftBadge"></div>
+      <div class="toolbar">
+        <span id="currentModeBadge" class="badge badge-slate">ยังไม่ได้เลือกโหมด</span>
+        <button id="logoutBtn" class="btn btn-ghost hidden">ออกจากระบบ</button>
       </div>
     </div>
 
-    <div id="fatalError" class="hidden mb-4 rounded-2xl bg-red-50 border border-red-200 p-4 text-red-700"></div>
-    <div id="errorPanel" class="hidden mb-4 rounded-2xl bg-amber-50 border border-amber-200 p-4 text-amber-800"></div>
-    <div id="toast" class="hidden fixed top-4 right-4 z-50 rounded-2xl px-4 py-3 shadow-xl text-white"></div>
-
-    <section id="loginPage" class="max-w-md mx-auto">
-      <div class="card panel p-6">
-        <h2 class="text-xl font-semibold mb-4">🔐 เข้าสู่ระบบพนักงาน</h2>
-        <input id="employeeName" type="text" class="w-full border rounded-2xl px-4 py-3 mb-3" placeholder="เช่น เอ, บีม, หมี" />
-        <button id="loginBtn" class="w-full rounded-2xl bg-slate-900 text-white py-3 font-semibold">เข้าสู่ระบบ</button>
+    <section id="loginPage" class="card p20 stack">
+      <div class="header-row">
+        <div>
+          <h2 style="margin:0 0 6px">เข้าสู่ระบบ</h2>
+          <div class="muted">กรอกชื่อพนักงานเพื่อเริ่มใช้งาน</div>
+        </div>
+      </div>
+      <div class="grid cols-2">
+        <input id="employeeName" placeholder="ชื่อพนักงาน" autocomplete="name" />
+        <button id="loginBtn" class="btn btn-primary">เข้าสู่ระบบ</button>
       </div>
     </section>
 
-    <section id="appPage" class="hidden">
-      <div class="card panel p-4 md:p-5 mb-4">
-        <div class="flex items-center justify-between gap-3 flex-wrap">
-          <div>👤 ผู้ใช้งาน: <span id="employeeDisplay" class="font-semibold"></span></div>
-          <div class="flex items-center gap-2 flex-wrap">
-            <span id="currentModeBadge" class="px-3 py-1 rounded-full text-sm bg-slate-100">ยังไม่ได้เลือกโหมด</span>
-            <button id="logoutBtn" class="px-4 py-2 rounded-xl nav-btn">ออกจากระบบ</button>
+    <section id="appPage" class="hidden stack">
+      <div class="card p16 stack">
+        <div class="header-row">
+          <div>
+            <div>ผู้ใช้งาน: <strong id="employeeDisplay">-</strong></div>
+            <div id="draftBadge" class="status-line"></div>
+          </div>
+          <div class="toolbar grid cols-4" style="width:100%">
+            <button id="countModeBtn" class="btn btn-count">🟢 นับสต๊อก</button>
+            <button id="issueModeBtn" class="btn btn-issue">🔵 เบิกของ</button>
+            <button id="receiveModeBtn" class="btn btn-receive">🟠 รับของ</button>
+            <button id="orderModeBtn" class="btn btn-order">🟣 สั่งของ</button>
           </div>
         </div>
       </div>
 
-      <div class="grid md:grid-cols-4 gap-4 mb-4">
-        <button id="countModeBtn" class="card p-5 text-left text-white mode-count">
-          <div class="text-xl font-bold">🟢 นับสต๊อก</div>
-          <div class="text-sm mt-1 text-white/90">บันทึกยอดคงเหลือจริง</div>
-        </button>
-        <button id="issueModeBtn" class="card p-5 text-left text-white mode-issue">
-          <div class="text-xl font-bold">🔵 เบิกของ</div>
-          <div class="text-sm mt-1 text-white/90">เบิกจากห้องสต๊อกไปยังจุดใช้งาน</div>
-        </button>
-        <button id="orderModeBtn" class="card p-5 text-left text-white mode-order">
-          <div class="text-xl font-bold">🟠 สั่งของ</div>
-          <div class="text-sm mt-1 text-white/90">รายการที่ควรสั่งสำหรับวันถัดไป</div>
-        </button>
-        <button id="receiveModeBtn" class="card p-5 text-left text-white mode-receive">
-          <div class="text-xl font-bold">🟤 รับของเข้า</div>
-          <div class="text-sm mt-1 text-white/90">เพิ่มสต๊อกจากการรับวัตถุดิบ</div>
-        </button>
-      </div>
-
-      <div id="navPanel" class="hidden">
-        <div class="card panel p-4 md:p-5 mb-4">
-          <div class="flex items-center justify-between gap-3 flex-wrap mb-4">
-            <div>
-              <div class="text-sm text-slate-500">ตำแหน่งปัจจุบัน</div>
-              <div id="breadcrumb" class="font-semibold"></div>
-            </div>
-            <div class="flex gap-2">
-              <button id="homeBtn" class="px-4 py-2 rounded-xl nav-btn">หน้าแรก</button>
-              <button id="backBtn" class="px-4 py-2 rounded-xl nav-btn">ย้อนกลับ</button>
-            </div>
+      <div id="workspaceCard" class="card p16 hidden stack">
+        <div class="header-row">
+          <div>
+            <div id="breadcrumb" class="breadcrumb">หน้าแรก</div>
+            <div id="viewStatus" class="status-line"></div>
           </div>
-
-          <div id="destinationWrap" class="hidden mb-4">
-            <div class="text-sm font-semibold text-slate-700 mb-2">ปลายทางการเบิก</div>
-            <div id="destinationButtons" class="grid grid-cols-1 sm:grid-cols-3 gap-2"></div>
+          <div class="toolbar">
+            <button id="homeBtn" class="btn btn-ghost">หน้าแรก</button>
+            <button id="backBtn" class="btn btn-ghost">ย้อนกลับ</button>
           </div>
+        </div>
 
-          <div id="nodeList" class="grid md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
-          <div id="itemPanel" class="hidden"></div>
+        <div id="errorPanel" class="card p16 hidden" style="border-color:#fecaca;background:#fef2f2;color:#991b1b"></div>
+        <div id="destinationWrap" class="hidden stack">
+          <div class="muted">เลือกปลายทางการเบิก</div>
+          <div id="destinationButtons" class="toolbar"></div>
+        </div>
+
+        <div id="nodeList" class="list"></div>
+        <div id="itemPanel" class="stack hidden"></div>
+
+        <div id="adminPanel" class="admin hidden stack">
+          <div><strong>Admin Tools</strong></div>
+          <div class="toolbar">
+            <button id="healthCheckBtn" class="btn btn-ghost">Health Check</button>
+            <button id="clearClientCacheBtn" class="btn btn-ghost">Clear Client Cache</button>
+            <button id="reloadViewsBtn" class="btn btn-ghost">Reload Views</button>
+          </div>
         </div>
       </div>
     </section>
+
+    <div class="footer-note">Frontend: GitHub Pages PWA • Backend: Google Apps Script • Database: Google Sheets • Restaurant Build</div>
   </div>
 
   <script type="module" src="./src/app.v47.js"></script>

@@ -1,9 +1,9 @@
 {
-  "name": "RealStock v47",
+  "name": "RealStock v47.1 Ultra Fast",
   "short_name": "RealStock",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#0f172a",
+  "background_color": "#f8fafc",
   "theme_color": "#0f172a",
   "icons": []
 }
