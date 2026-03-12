@@ -1,4 +1,4 @@
-const CACHE_NAME = "realstock-v49-static";
+const CACHE_NAME = "realstock-v49-5-static";
 const ASSETS = [
   "./",
   "./index.html",
