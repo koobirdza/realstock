@@ -1,0 +1,6 @@
+export const GOOGLE_SCRIPT_URL = 'PUT_YOUR_WEB_APP_EXEC_URL_HERE';
+export const APP_VERSION = 'v48.0 Extreme Fast';
+export const CACHE_TTL = { catalog: 10 * 60 * 1000, currentStock: 5 * 60 * 1000, orderView: 2 * 60 * 1000 };
+export const SAVE_TIMEOUT_MS = 20000;
+export const ENABLE_SW = true;
+export const MODES = { count: { label: 'นับสต๊อก', color: 'count' }, issue: { label: 'เบิกของ', color: 'issue' }, receive: { label: 'รับของ', color: 'receive' }, order: { label: 'สั่งของ', color: 'order' } };
