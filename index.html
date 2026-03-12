@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>RealStock v49.5 HyperSpeed Sync</title>
+  <title>RealStock v50 LTS HyperSpeed Sync</title>
   <meta name="theme-color" content="#0f172a" />
   <link rel="manifest" href="./manifest.json" />
   <style>
@@ -29,6 +29,9 @@
     .mode.receive{background:linear-gradient(135deg,#b45309,#f59e0b)}
     .mode.order{background:linear-gradient(135deg,#6d28d9,#a78bfa)}
     .badge{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:6px 12px;font-size:13px;background:#e2e8f0}
+    #syncBadge[data-sync="saving"]{background:#dbeafe;color:#1d4ed8}
+    #syncBadge[data-sync="synced"]{background:#dcfce7;color:#166534}
+    #syncBadge[data-sync="error"]{background:#fee2e2;color:#991b1b}
     .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
     .between{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}
     .btn{border:1px solid var(--line);background:#fff;border-radius:14px;padding:10px 14px;cursor:pointer;font-weight:700}
@@ -77,12 +80,13 @@
   <div class="app">
     <div class="header">
       <div>
-        <h1 class="title">🍲 RealStock v49.5 HyperSpeed Sync</h1>
-        <div class="sub">GitHub Pages + Google Apps Script + Google Sheets • optimized for restaurant workflow</div>
+        <h1 class="title">🍲 RealStock v50 LTS HyperSpeed Sync</h1>
+        <div class="sub">GitHub Pages + Google Apps Script + Google Sheets • long-term stable release</div>
       </div>
       <div class="row">
         <span id="versionLabel" class="badge"></span>
         <span id="healthBadge" class="badge">กำลังเช็กระบบ...</span>
+        <span id="syncBadge" class="badge" data-sync="idle">พร้อม</span>
       </div>
     </div>
 
@@ -125,10 +129,13 @@
           <div>
             <strong>Admin Tools</strong>
             <div class="hint">ซ่อนจากหน้าใช้งานปกติ เปิดได้เฉพาะ ?admin=1</div>
+            <div id="runtimePanel" class="hint" style="margin-top:6px"></div>
+            <div id="diagPanel" class="hint" style="margin-top:6px"></div>
           </div>
           <div class="row">
             <button id="warmBtn" class="btn">Warm cache</button>
             <button id="rebuildBtn" class="btn">Rebuild views</button>
+            <button id="refreshDiagBtn" class="btn">Refresh diagnostics</button>
           </div>
         </div>
       </div>
@@ -153,6 +160,6 @@
       <div id="itemPanel" class="hidden"></div>
     </section>
   </div>
-  <script type="module" src="./src/app.v49.js"></script>
+  <script type="module" src="./src/app.v50.js"></script>
 </body>
 </html>
