@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>RealStock v49 HyperSpeed</title>
+  <title>RealStock v49.2 Instant Nav</title>
   <meta name="theme-color" content="#0f172a" />
   <link rel="manifest" href="./manifest.json" />
   <style>
@@ -53,6 +53,21 @@
     .hint{color:var(--muted);font-size:13px}
     .pill{display:inline-block;padding:4px 10px;border-radius:999px;background:#eff6ff;color:#1d4ed8;font-size:12px;font-weight:700}
     .skeleton{height:86px;border-radius:18px;background:linear-gradient(90deg,#e2e8f0 25%,#f8fafc 37%,#e2e8f0 63%);background-size:400% 100%;animation:shine 1.2s infinite}
+
+    .nav-card{display:flex;flex-direction:column;gap:8px;min-height:110px}
+    .nav-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+    .nav-title{font-weight:800;font-size:16px}
+    .nav-icon{font-size:24px;line-height:1}
+    .mini-badge{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:4px 8px;background:#f1f5f9;color:#334155;font-size:12px;font-weight:700}
+    .crumb{display:inline-flex;align-items:center;gap:6px;font-weight:700}
+    .crumb-icon{font-size:18px;line-height:1}
+    .crumb-sep{display:inline-block;margin:0 8px;color:#94a3b8}
+    [data-selected="1"]{background:#dbeafe;border-color:#60a5fa}
+    #modeBadge[data-mode-color="count"]{background:#dcfce7;color:#166534}
+    #modeBadge[data-mode-color="issue"]{background:#dbeafe;color:#1d4ed8}
+    #modeBadge[data-mode-color="receive"]{background:#ffedd5;color:#b45309}
+    #modeBadge[data-mode-color="order"]{background:#ede9fe;color:#6d28d9}
+
     @keyframes shine{0%{background-position:100% 0}100%{background-position:0 0}}
     @media(max-width:880px){.modes,.nav-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
     @media(max-width:640px){.modes,.nav-grid{grid-template-columns:1fr}.title{font-size:24px}}
@@ -62,7 +77,7 @@
   <div class="app">
     <div class="header">
       <div>
-        <h1 class="title">🍲 RealStock v49 HyperSpeed</h1>
+        <h1 class="title">🍲 RealStock v49.2 Instant Nav</h1>
         <div class="sub">GitHub Pages + Google Apps Script + Google Sheets • optimized for restaurant workflow</div>
       </div>
       <div class="row">
@@ -99,10 +114,10 @@
       </div>
 
       <div class="grid modes" style="margin-bottom:12px">
-        <button class="mode count" data-mode="count">🟢 นับสต๊อก<small>render ก่อน โหลด data ทีหลัง</small></button>
-        <button class="mode issue" data-mode="issue">🔵 เบิกของ<small>กันกด save ซ้ำ + patch เฉพาะ item</small></button>
-        <button class="mode receive" data-mode="receive">🟠 รับของ<small>ไม่ rebuild ทั้งระบบ</small></button>
-        <button class="mode order" data-mode="order">🟣 สั่งของ<small>ใช้ computed order view</small></button>
+        <button class="mode count" data-mode="count">🟢 นับสต๊อก<small>instant nav + memory cache</small></button>
+        <button class="mode issue" data-mode="issue">🔵 เบิกของ<small>breadcrumb + save lock + icons</small></button>
+        <button class="mode receive" data-mode="receive">🟠 รับของ<small>ไม่ใช้วันนับเป็นหมวด</small></button>
+        <button class="mode order" data-mode="order">🟣 สั่งของ<small>toast + fast category rendering</small></button>
       </div>
 
       <div id="adminPanel" class="card pad hidden" style="margin-bottom:12px">
