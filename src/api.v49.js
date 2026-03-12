@@ -31,6 +31,12 @@ export function clearDataCaches() {
   clearCache("stock.");
   clearCache("order.");
 }
+export function setCurrentStockCache(payload) {
+  if (payload?.ok) setCache("stock.current", payload, CACHE_TTL.stock);
+}
+export function setOrderViewCache(payload) {
+  if (payload?.ok) setCache("order.view", payload, CACHE_TTL.orderView);
+}
 export const health = () => getJson("health");
 export const getCatalog = (mode) => getJson("catalog", { mode }, `catalog.${mode}`, CACHE_TTL.catalog);
 export const getCurrentStock = () => getJson("currentStock", {}, "stock.current", CACHE_TTL.stock);

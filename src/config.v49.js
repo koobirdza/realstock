@@ -1,4 +1,4 @@
-export const APP_VERSION = "v49.2-instant-nav";
+export const APP_VERSION = "v49.5-hyperspeed-sync";
 export const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwSOEIId8C7BVTxCYwiJoSG7N7k4OSy1TfZXJyDHSD2AWSJ7NWGboHYIqMtqbqP2ISn4Q/exec";
 export const ENABLE_SERVICE_WORKER = true;
 export const CACHE_TTL = {
@@ -22,5 +22,5 @@ export const MODE_META = {
   receive: { label: "🟠 รับของ", color: "receive", saveLabel: "บันทึกรับของ" },
   order: { label: "🟣 สั่งของ", color: "order", saveLabel: "บันทึกคำสั่งซื้อ" }
 };
-export const SAVE_TIMEOUT_MS = 20000;
+export const SAVE_TIMEOUT_MS = 25000;
 export const MAX_QTY = 999999;
