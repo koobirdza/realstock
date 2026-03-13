@@ -3,9 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>RealStock v51.4.2 Data Fix + Cache Fix</title>
+  <title>RealStock v51.4.3 PWA Install Fix</title>
   <meta name="theme-color" content="#0f172a" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="RealStock" />
   <link rel="manifest" href="./manifest.json" />
+  <link rel="icon" type="image/png" sizes="32x32" href="./icons/favicon-32.png" />
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />
   <style>
     :root{--bg:#f4f7fb;--panel:#fff;--ink:#0f172a;--muted:#64748b;--line:#dbe4f0;--shadow:0 12px 30px rgba(15,23,42,.08);--count:#16a34a;--issue:#2563eb;--receive:#d97706;--order:#7c3aed;--danger:#dc2626;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
     *{box-sizing:border-box} html,body{margin:0;background:var(--bg);color:var(--ink);transition:background .2s ease}
@@ -17,8 +23,8 @@
   <div class="app">
     <div class="header">
       <div>
-        <h1 class="title">🍲 RealStock v51.4.2 Data Fix + Cache Fix</h1>
-        <div class="sub">GitHub Pages + Google Apps Script + Google Sheets • stock-zone catalog + data fix + cache fix + make-ready logs</div>
+        <h1 class="title">🍲 RealStock v51.4.3 PWA Install Fix</h1>
+        <div class="sub">GitHub Pages + Google Apps Script + Google Sheets • stock-zone catalog + make-ready logs + PWA install fix</div>
       </div>
       <div class="row">
         <span id="versionLabel" class="badge"></span>
@@ -49,6 +55,7 @@
           <div class="row">
             <button id="homeBtn" class="btn ghost hidden">หน้าแรก</button>
             <button id="backBtn" class="btn ghost hidden">ย้อนกลับ</button>
+            <button id="installBtn" class="btn hidden" disabled>ติดตั้งแอป</button>
             <button id="logoutBtn" class="btn">ออกจากระบบ</button>
           </div>
         </div>
@@ -98,6 +105,7 @@
       <div id="itemPanel" class="hidden"></div>
     </section>
   </div>
+  <script src="./pwa-register.js"></script>
   <script type="module" src="./src/app.v51.js"></script>
 </body>
 </html>
