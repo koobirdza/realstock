@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>RealStock v51.1 Nightly Ops</title>
+  <title>RealStock v51.2 Fast Nightly Ops</title>
   <meta name="theme-color" content="#0f172a" />
   <link rel="manifest" href="./manifest.json" />
   <style>
@@ -17,8 +17,8 @@
   <div class="app">
     <div class="header">
       <div>
-        <h1 class="title">🍲 RealStock v51.1 Nightly Ops</h1>
-        <div class="sub">GitHub Pages + Google Apps Script + Google Sheets • nightly snapshot at 22:00</div>
+        <h1 class="title">🍲 RealStock v51.2 Fast Nightly Ops</h1>
+        <div class="sub">GitHub Pages + Google Apps Script + Google Sheets • fast mode preload + nightly snapshot at 22:00</div>
       </div>
       <div class="row">
         <span id="versionLabel" class="badge"></span>
@@ -56,9 +56,9 @@
 
       <div class="grid modes" style="margin-bottom:12px">
         <button class="mode count" data-mode="count">🟢 นับสต๊อก<small>บันทึกยอดนับอย่างเดียว</small></button>
-        <button class="mode issue" data-mode="issue">🔵 เบิกของ<small>บันทึกรายการเบิกอย่างเดียว</small></button>
-        <button class="mode receive" data-mode="receive">🟠 รับของ<small>รับเข้า log ก่อน อัปเดตหลัง 22:00</small></button>
-        <button class="mode order" data-mode="order">🟣 สั่งของ<small>ดู snapshot + suggest จาก nightly</small></button>
+        <button class="mode issue" data-mode="issue">🔵 เบิกของ<small>บันทึกไวขึ้น • append log only</small></button>
+        <button class="mode receive" data-mode="receive">🟠 รับของ<small>ใช้กรอกของเข้าจริงเมื่อของมาถึง</small></button>
+        <button class="mode order" data-mode="order">🟣 ควรสั่งอะไรบ้าง<small>รายงานจำนวนที่ควรสั่ง • ไม่ต้องกรอก</small></button>
       </div>
 
       <div id="adminPanel" class="card pad hidden" style="margin-bottom:12px">
@@ -86,7 +86,7 @@
         </div>
       </div>
 
-      <div id="infoBanner" class="card pad" style="margin-bottom:12px"><strong>Count/Issue/Receive/Order = append log ก่อน • view/suggest อัปเดตหลัง nightly 22:00</strong></div>
+      <div id="infoBanner" class="card pad" style="margin-bottom:12px"><strong>Count/Issue/Receive = append log only • Order = รายงานจำนวนที่ควรสั่งจาก nightly</strong></div>
 
       <div id="destinationPanel" class="card pad hidden" style="margin-bottom:12px">
         <div><strong>ปลายทางการเบิก</strong></div>
