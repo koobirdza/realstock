@@ -1,8 +1,8 @@
-import { CACHE_TTL, GOOGLE_SCRIPT_URL, SAVE_TIMEOUT_MS } from "./config.v51.js";
-import { getCache, setCache, clearCache } from "./store.v51.js";
-import { withTimeout } from "./utils.v51.js";
+import { CACHE_TTL, GOOGLE_SCRIPT_URL, SAVE_TIMEOUT_MS } from "./config.v51.js?v=51.4.6";
+import { getCache, setCache, clearCache } from "./store.v51.js?v=51.4.6";
+import { withTimeout } from "./utils.v51.js?v=51.4.6";
 function buildUrl(action, params = {}) { const url = new URL(GOOGLE_SCRIPT_URL); url.searchParams.set("action", action); Object.entries(params).forEach(([k,v]) => { if (v !== undefined && v !== null && v !== "") url.searchParams.set(k,v); }); return url.toString(); }
-export async function getJson(action, params = {}, cacheName = "", ttlMs = 0) { if (cacheName && ttlMs > 0) { const hit = getCache(cacheName); if (hit?.value) return hit.value; } const res = await fetch(buildUrl(action, { ...params, _: Date.now() }), { method: "GET", cache: "no-store" }); const json = await res.json(); if (cacheName && ttlMs > 0 && json?.ok) setCache(cacheName, json, ttlMs); return json; }
+export async function getJson(action, params = {}, cacheName = "", ttlMs = 0) { if (cacheName && ttlMs > 0) { const hit = getCache(cacheName); if (hit?.value) return hit.value; } const res = await fetch(buildUrl(action, { ...params, _: Date.now() }), { method: "GET", cache: "no-store" }); const text = await res.text(); let json = null; try { json = text ? JSON.parse(text) : null; } catch (err) { throw new Error(`response parse failed for ${action}`); } if (cacheName && ttlMs > 0 && json?.ok) setCache(cacheName, json, ttlMs); return json; }
 export function clearDataCaches() { clearCache("bootstrap."); clearCache("catalog."); clearCache("stock."); clearCache("order."); clearCache("diag."); }
 export const health = () => getJson("health");
 export const diagnostics = () => getJson("diagnostics", { admin: 1 }, "diag.admin", CACHE_TTL.diagnostics);

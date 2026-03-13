@@ -1,11 +1,11 @@
-import { state, setEmployee, setMode, resetNav } from "./state.v51.js";
-import { restoreSession, persistSession, logoutSession } from "./auth.v51.js";
-import { bindDom, renderSession, setHealth, showError, toast, renderAdmin, renderBreadcrumb, renderDestinationPicker, renderNodesFromHtml, renderNodes, renderItems, renderSkeleton, setSaveLocked, renderInfoBanner } from "./ui.v51.js";
-import { bootstrapData, health, submitAction, clearDataCaches, adminWarm, adminNightly, diagnostics, preflight, getCatalog, getCurrentStock, getOrderView } from "./api.v51.js";
-import { getNodeByPath, needsDestination, warmCatalogMode, getWarmMode } from "./catalog.v51.js";
-import { collectRows } from "./inventory.v51.js";
-import { $, $$, createRequestId, params, debounce } from "./utils.v51.js";
-import { setDraft, getDraft, clearDraft } from "./store.v51.js";
+import { state, setEmployee, setMode, resetNav } from "./state.v51.js?v=51.4.6";
+import { restoreSession, persistSession, logoutSession } from "./auth.v51.js?v=51.4.6";
+import { bindDom, renderSession, setHealth, showError, toast, renderAdmin, renderBreadcrumb, renderDestinationPicker, renderNodesFromHtml, renderNodes, renderItems, renderSkeleton, setSaveLocked, renderInfoBanner } from "./ui.v51.js?v=51.4.6";
+import { bootstrapData, health, submitAction, clearDataCaches, adminWarm, adminNightly, diagnostics, preflight, getCatalog, getCurrentStock, getOrderView } from "./api.v51.js?v=51.4.6";
+import { getNodeByPath, needsDestination, warmCatalogMode, getWarmMode } from "./catalog.v51.js?v=51.4.6";
+import { collectRows } from "./inventory.v51.js?v=51.4.6";
+import { $, $$, createRequestId, params, debounce } from "./utils.v51.js?v=51.4.6";
+import { setDraft, getDraft, clearDraft } from "./store.v51.js?v=51.4.6";
 
 function currentWarm() { return getWarmMode(state.mode); }
 function currentTree() { return currentWarm().tree; }
@@ -151,7 +151,14 @@ async function chooseMode(mode) {
     console.warn('bootstrap failed, fallback to mode load', bootErr);
     clearDataCaches();
     state.bootstrapped = false;
-    await ensureModeLoaded(mode);
+    try {
+      await ensureModeLoaded(mode);
+    } catch (modeErr) {
+      console.error('mode load failed', modeErr);
+      showError(modeErr?.message || 'โหลดโหมดไม่สำเร็จ');
+      toast('โหลดโหมดไม่สำเร็จ', 'error', 2000);
+      return;
+    }
   }
   state.scheduleBadgeByPath = getWarmMode(mode).scheduleBadgeByPath;
   render();
@@ -246,6 +253,7 @@ async function bootstrap() {
     } catch (err) {
       console.warn('bootstrap preload failed', err);
       clearDataCaches();
+      state.bootstrapped = false;
     }
   }
   await refreshDiagnostics();

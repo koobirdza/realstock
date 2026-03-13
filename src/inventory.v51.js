@@ -1,7 +1,7 @@
-import { MAX_QTY } from "./config.v51.js";
-import { state } from "./state.v51.js";
-import { getItems } from "./catalog.v51.js";
-import { nowIso, todayIso, parseNumber } from "./utils.v51.js";
+import { MAX_QTY } from "./config.v51.js?v=51.4.6";
+import { state } from "./state.v51.js?v=51.4.6";
+import { getItems } from "./catalog.v51.js?v=51.4.6";
+import { nowIso, todayIso, parseNumber } from "./utils.v51.js?v=51.4.6";
 
 export function collectRows(node, values) {
   if (!state.employee) throw new Error("ยังไม่ได้เข้าสู่ระบบ");
