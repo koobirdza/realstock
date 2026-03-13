@@ -1,7 +1,7 @@
 import { ENABLE_SERVICE_WORKER } from "./config.v51.js";
 import { state, setEmployee, setMode, resetNav } from "./state.v51.js";
 import { restoreSession, persistSession, logoutSession } from "./auth.v51.js";
-import { bindDom, renderSession, setHealth, showError, toast, renderAdmin, renderBreadcrumb, renderDestinationPicker, renderNodesFromHtml, renderItems, renderSkeleton, setSaveLocked, renderInfoBanner } from "./ui.v51.js";
+import { bindDom, renderSession, setHealth, setSyncState, showError, toast, renderAdmin, renderBreadcrumb, renderDestinationPicker, renderNodesFromHtml, renderItems, renderSkeleton, setSaveLocked, renderInfoBanner } from "./ui.v51.js";
 import { bootstrapData, health, submitAction, clearDataCaches, adminWarm, adminNightly, diagnostics, preflight } from "./api.v51.js";
 import { getNodeByPath, needsDestination, warmCatalogMode, getWarmMode } from "./catalog.v51.js";
 import { collectRows } from "./inventory.v51.js";
@@ -17,7 +17,24 @@ function attachInputAutosave() { if (state.mode === 'order') return; $$('[data-q
 async function refreshHealth() { try { const res = await health(); state.nightlyCutoffHour = Number(res?.nightlyCutoffHour || 22); setHealth(!!res?.ok, res?.ok ? `พร้อมใช้งาน • คำนวณรอบ ${state.nightlyCutoffHour}:00` : `มีปัญหา • ${res?.message || ''}`); } catch (err) { setHealth(false, 'เชื่อมต่อไม่สำเร็จ'); } }
 async function refreshDiagnostics() { if (!state.admin) return; try { const [diag, pf] = await Promise.all([diagnostics().catch(() => null), preflight().catch(() => null)]); const lines = []; if (diag?.ok) lines.push(`nightly runs: ${diag.diagnostics.nightlyRuns || 0} • last nightly: ${diag.diagnostics.lastNightlyAt || '-'}`); if (pf?.ok) lines.push(`preflight: ${pf.summary.status}`); state.infoBanner = lines.join(' | ') || 'Count/Issue/Receive = append log only • Order = nightly report'; renderAdmin(); } catch (err) {} }
 function applyWarmMode(mode, rows, cached = false) { const warmed = warmCatalogMode(mode, rows || []); state.catalogRowsByMode[mode] = rows || []; state.treeByMode[mode] = warmed.tree; state.instantReadyModes[mode] = true; if (state.mode === mode) { state.scheduleBadgeByPath = warmed.scheduleBadgeByPath; state.lastCacheStamp = cached ? 'ใช้ cache • snapshot ล่าสุดจากรอบ 22:00' : 'พร้อมใช้งาน • โหลดครั้งเดียวแล้วใช้ต่อ'; } }
-async function ensureBootstrapLoaded(force = false) { if (state.bootstrapped && !force) return; const boot = await bootstrapData(); if (!boot?.ok) throw new Error(boot?.message || 'โหลดข้อมูลเริ่มต้นไม่สำเร็จ'); ['count','issue','receive','order'].forEach((mode) => applyWarmMode(mode, boot.catalogs?.[mode] || [], true)); state.stockMap = boot.stock || {}; state.orderRows = boot.orderView || []; state.nightlyCutoffHour = Number(boot.nightlyCutoffHour || 22); state.bootstrapped = true; state.lastCacheStamp = 'พร้อมใช้งาน • โหลดครั้งเดียวแล้วใช้ต่อ'; }
+async function ensureBootstrapLoaded(force = false) {
+  if (state.bootstrapped && !force) return;
+  setSyncState('saving', 'กำลังโหลด');
+  try {
+    const boot = await bootstrapData();
+    if (!boot?.ok) throw new Error(boot?.message || 'โหลดข้อมูลเริ่มต้นไม่สำเร็จ');
+    ['count','issue','receive','order'].forEach((mode) => applyWarmMode(mode, boot.catalogs?.[mode] || [], true));
+    state.stockMap = boot.stock || {};
+    state.orderRows = boot.orderView || [];
+    state.nightlyCutoffHour = Number(boot.nightlyCutoffHour || 22);
+    state.bootstrapped = true;
+    state.lastCacheStamp = 'พร้อมใช้งาน • โหลดครั้งเดียวแล้วใช้ต่อ';
+    setSyncState('synced', 'พร้อมใช้งาน');
+  } catch (err) {
+    setSyncState('error', 'โหลดไม่สำเร็จ');
+    throw err;
+  }
+}
 function render() { renderSession(); renderAdmin(); renderDestinationPicker(); renderInfoBanner(); if (!state.employee || !state.mode) return; renderBreadcrumb(currentTree()); const node = currentNode(); const html = currentHtml(); if (state.path.length === 0 && html.targets) { renderNodesFromHtml(html.targets, (key) => { state.path.push(key); showError(''); render(); }); return; } if (state.path.length === 1 && html.subsByTarget?.[state.path[0]]) { renderNodesFromHtml(html.subsByTarget[state.path[0]], (key) => { state.path.push(key); showError(''); render(); }); return; } const children = Object.keys(node?.children || {}); if (children.length) { renderNodesFromHtml('', () => {}); return; } renderItems(node, state.stockMap, state.orderRows, handleSave); attachInputAutosave(); setSaveLocked(state.saveInFlight); }
 async function chooseMode(mode) { setMode(mode); showError(''); render(); renderSkeleton(); await ensureBootstrapLoaded(); state.scheduleBadgeByPath = getWarmMode(mode).scheduleBadgeByPath; render(); }
 async function handleSave() { if (state.saveInFlight || state.mode === 'order') return; try { showError(''); const node = currentNode(); if (needsDestination(state.mode) && !state.destination) throw new Error('กรุณาเลือกปลายทางการเบิก'); const rows = collectRows(node, readInputValues()); const requestId = createRequestId(); state.saveInFlight = true; setSaveLocked(true, 'Saving...'); toast('รับรายการแล้ว • ยังไม่คำนวณทันที', 'info', 900); const res = await submitAction(state.mode, requestId, rows); if (!res?.ok) throw new Error(res?.message || 'บันทึกไม่สำเร็จ'); clearDraft(); if (state.path.length) state.path.pop(); render(); toast(`Accepted • คำนวณรอบ ${state.nightlyCutoffHour}:00`, 'success', 2000); } catch (err) { showError(err?.message || 'บันทึกไม่สำเร็จ'); toast('Error', 'error'); } finally { state.saveInFlight = false; setSaveLocked(false); } }

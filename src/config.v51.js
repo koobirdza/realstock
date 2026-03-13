@@ -1,8 +1,8 @@
-export const APP_VERSION = "v51.2-performance-order-report";
+export const APP_VERSION = "v51.4-make-ready";
 export const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwSOEIId8C7BVTxCYwiJoSG7N7k4OSy1TfZXJyDHSD2AWSJ7NWGboHYIqMtqbqP2ISn4Q/exec";
 export const ENABLE_SERVICE_WORKER = true;
 export const CACHE_TTL = { bootstrap: 5 * 60 * 1000, catalog: 10 * 60 * 1000, stock: 5 * 60 * 1000, orderView: 5 * 60 * 1000, diagnostics: 15 * 1000 };
-export const STORAGE_KEYS = { session: "realstock.v51_2.session", draft: "realstock.v51_2.draft", cachePrefix: "realstock.v51_2.cache." };
+export const STORAGE_KEYS = { session: "realstock.v51_4.session", draft: "realstock.v51_4.draft", cachePrefix: "realstock.v51_4.cache." };
 export const ISSUE_DESTINATIONS = [
   { key: "front", label: "หน้าร้าน" },
   { key: "kitchen", label: "ครัว" },
