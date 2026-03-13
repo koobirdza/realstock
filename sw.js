@@ -1,9 +1,10 @@
-const CACHE_VERSION = 'realstock-v51-4-3';
+const CACHE_VERSION = 'realstock-v51-4-4';
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.json',
   './pwa-register.js',
+  './icons/favicon-32.png',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-512-maskable.png',
@@ -22,7 +23,9 @@ const APP_SHELL = [
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_VERSION).then((cache) => cache.addAll(APP_SHELL)).then(() => self.skipWaiting())
+    caches.open(CACHE_VERSION)
+      .then((cache) => cache.addAll(APP_SHELL))
+      .then(() => self.skipWaiting())
   );
 });
 
@@ -34,12 +37,6 @@ self.addEventListener('activate', (event) => {
   })());
 });
 
-self.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'SKIP_WAITING') {
-    self.skipWaiting();
-  }
-});
-
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   const url = new URL(event.request.url);
@@ -48,15 +45,16 @@ self.addEventListener('fetch', (event) => {
   event.respondWith((async () => {
     const cache = await caches.open(CACHE_VERSION);
     const cached = await cache.match(event.request, { ignoreSearch: true });
-    const networkPromise = fetch(event.request)
-      .then((response) => {
-        if (response && response.status === 200 && response.type === 'basic') {
-          cache.put(event.request, response.clone()).catch(() => {});
-        }
-        return response;
-      })
-      .catch(() => cached);
+    if (cached) return cached;
 
-    return cached || networkPromise;
+    try {
+      const response = await fetch(event.request);
+      if (response && response.status === 200 && response.type === 'basic') {
+        cache.put(event.request, response.clone()).catch(() => {});
+      }
+      return response;
+    } catch (err) {
+      return cached || Response.error();
+    }
   })());
 });

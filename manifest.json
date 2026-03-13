@@ -1,13 +1,13 @@
 {
-  "name": "RealStock v51.4.3",
+  "name": "RealStock v51.4.4",
   "short_name": "RealStock",
-  "description": "ระบบนับสต๊อก เบิกของ รับของ และสรุปควรสั่ง สำหรับร้านอาหาร",
+  "description": "ระบบนับสต๊อก เบิกของ รับของ และสรุปควรสั่ง สำหรับร้านอาหาร • PWA loop fix",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#0f172a",
-  "theme_color": "#0f172a",
+  "background_color": "#0b1220",
+  "theme_color": "#0b1220",
   "icons": [
     {
       "src": "./icons/icon-192.png",
@@ -25,5 +25,6 @@
       "type": "image/png",
       "purpose": "maskable"
     }
-  ]
+  ],
+  "id": "./?source=pwa"
 }
