@@ -1,22 +1,50 @@
 import { MODE_META, ISSUE_DESTINATIONS, APP_VERSION } from "./config.v51.js";
 import { state } from "./state.v51.js";
 import { $, $$, escapeHtml } from "./utils.v51.js";
-import { getItems, pathLabels, needsDestination } from "./catalog.v51.js";
+import { getItems, pathLabels, needsDestination, getChildren } from "./catalog.v51.js";
+
 const dom = {};
+
 export function bindDom() {
   ["loginPage","appPage","employeeName","loginBtn","logoutBtn","employeeDisplay","modeBadge","healthBadge","versionLabel","homeBtn","backBtn","breadcrumb","nodePanel","itemPanel","destinationPanel","destinationButtons","toast","errorBox","cacheStamp","adminPanel","warmBtn","nightlyBtn","preflightBtn","diagText","infoBanner"].forEach((id) => dom[id] = $(id));
   dom.versionLabel.textContent = APP_VERSION;
   return dom;
 }
+
 export function showError(message = "") { dom.errorBox.textContent = message; dom.errorBox.classList.toggle("hidden", !message); }
 export function setHealth(ok, text) { dom.healthBadge.textContent = text; dom.healthBadge.style.background = ok ? "#dcfce7" : "#fee2e2"; dom.healthBadge.style.color = ok ? "#166534" : "#991b1b"; }
 export function toast(message, type = "info", ms = 1800) { dom.toast.className = `toast ${type}`; dom.toast.textContent = message; dom.toast.classList.remove("hidden"); clearTimeout(dom.toast._t); dom.toast._t = setTimeout(() => dom.toast.classList.add("hidden"), ms); }
-export function renderSession() { dom.loginPage.classList.toggle("hidden", !!state.employee); dom.appPage.classList.toggle("hidden", !state.employee); dom.employeeDisplay.textContent = state.employee || "-"; dom.homeBtn.classList.toggle("hidden", !state.mode); dom.backBtn.classList.toggle("hidden", !state.mode || !state.path.length); const meta = MODE_META[state.mode]; dom.modeBadge.textContent = meta?.label || "ยังไม่ได้เลือกโหมด"; dom.modeBadge.dataset.modeColor = meta?.color || ""; document.body.dataset.mode = state.mode || ""; }
+
+export function renderSession() {
+  dom.loginPage.classList.toggle("hidden", !!state.employee);
+  dom.appPage.classList.toggle("hidden", !state.employee);
+  dom.employeeDisplay.textContent = state.employee || "-";
+  dom.homeBtn.classList.toggle("hidden", !state.mode);
+  dom.backBtn.classList.toggle("hidden", !state.mode || !state.path.length);
+  const meta = MODE_META[state.mode];
+  dom.modeBadge.textContent = meta?.label || "ยังไม่ได้เลือกโหมด";
+  dom.modeBadge.dataset.modeColor = meta?.color || "";
+  document.body.dataset.mode = state.mode || "";
+  document.documentElement.dataset.mode = state.mode || "";
+}
+
 export function renderAdmin() { dom.adminPanel.classList.toggle("hidden", !state.admin); if (state.admin && dom.diagText) dom.diagText.innerHTML = escapeHtml(state.infoBanner || ''); }
 export function renderInfoBanner() { if (!dom.infoBanner) return; const meta = MODE_META[state.mode] || {}; const helper = meta.helper || 'Count/Issue/Receive = append log only • Order = nightly report'; dom.infoBanner.innerHTML = `<strong>${escapeHtml(helper)}</strong>`; }
 export function renderBreadcrumb(tree) { const crumbs = pathLabels(tree, state.path); dom.breadcrumb.innerHTML = crumbs.map((c, idx) => `${idx ? '<span class="crumb-sep">›</span>' : ''}<span class="crumb"><span class="crumb-icon">${c.icon || '📁'}</span><span>${escapeHtml(c.label)}</span></span>`).join(''); dom.cacheStamp.innerHTML = escapeHtml(state.lastCacheStamp || 'snapshot ล่าสุดจากรอบ 22:00'); }
 export function renderDestinationPicker() { const visible = needsDestination(state.mode); dom.destinationPanel.classList.toggle("hidden", !visible); if (!visible) return; dom.destinationButtons.innerHTML = ISSUE_DESTINATIONS.map((d) => `<button class="btn" data-dest="${escapeHtml(d.key)}" ${state.destination === d.key ? 'data-selected="1"' : ''}>${escapeHtml(d.label)}</button>`).join(''); }
-export function renderNodesFromHtml(html, onOpen) { dom.itemPanel.classList.add("hidden"); dom.nodePanel.classList.remove("hidden"); dom.nodePanel.innerHTML = html || '<div class="card pad">ไม่พบหมวด</div>'; $$('[data-node]', dom.nodePanel).forEach((el) => el.addEventListener('click', () => onOpen(el.dataset.node))); }
+
+function nodeCardsHtml(nodes = []) {
+  if (!nodes.length) return '<div class="card pad">ไม่พบหมวด</div>';
+  return nodes.map((node) => {
+    const badgeHtml = node.badge ? `<span class="mini-badge">${escapeHtml(node.badge)}</span>` : '';
+    return `<button class="nav-btn nav-card ${escapeHtml(node.type || '')}" data-node="${escapeHtml(node.key || '')}"><div class="nav-top"><span class="nav-icon">${escapeHtml(node.icon || '📁')}</span>${badgeHtml}</div><div class="nav-title">${escapeHtml(node.label || node.key || 'ไม่ระบุหมวด')}</div><div class="hint">เปิดหมวด</div></button>`;
+  }).join('');
+}
+
+function bindNodeClicks(onOpen) { $$('[data-node]', dom.nodePanel).forEach((el) => el.addEventListener('click', () => onOpen(el.dataset.node))); }
+export function renderNodesFromHtml(html, onOpen) { dom.itemPanel.classList.add("hidden"); dom.nodePanel.classList.remove("hidden"); dom.nodePanel.innerHTML = html || '<div class="card pad">ไม่พบหมวด</div>'; bindNodeClicks(onOpen); }
+export function renderNodes(node, onOpen) { dom.itemPanel.classList.add("hidden"); dom.nodePanel.classList.remove("hidden"); dom.nodePanel.innerHTML = nodeCardsHtml(getChildren(node)); bindNodeClicks(onOpen); }
+
 export function setSaveLocked(locked, label = "") { const saveBtn = $("saveBtn"); if (!saveBtn) return; saveBtn.disabled = !!locked; saveBtn.dataset.originalLabel ||= saveBtn.textContent; saveBtn.textContent = locked ? (label || "Saving...") : saveBtn.dataset.originalLabel; $$('[data-step], [data-qty-index], #clearBtn, #restoreBtn', dom.itemPanel).forEach((el) => { el.disabled = !!locked; }); }
 function itemMetaHtml(mode, item, stock, order) {
   if (mode === 'count') return `<div class="meta">จุดนับ: ${escapeHtml(item.count_zone || item.stock_type || item.target_category || '-')}</div><div class="meta">snapshot ล่าสุด: ${escapeHtml(stock.current_stock ?? '-')} ${escapeHtml(item.unit || '')}</div>`;

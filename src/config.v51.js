@@ -1,8 +1,8 @@
-export const APP_VERSION = "v51.4.4-sw-loop-fix";
+export const APP_VERSION = "v51.4.5-mobile-mode-fix";
 export const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwSOEIId8C7BVTxCYwiJoSG7N7k4OSy1TfZXJyDHSD2AWSJ7NWGboHYIqMtqbqP2ISn4Q/exec";
 export const ENABLE_SERVICE_WORKER = false;
 export const CACHE_TTL = { bootstrap: 5 * 60 * 1000, catalog: 10 * 60 * 1000, stock: 5 * 60 * 1000, orderView: 5 * 60 * 1000, diagnostics: 15 * 1000 };
-export const STORAGE_KEYS = { session: "realstock.v51_4_4.session", draft: "realstock.v51_4_4.draft", cachePrefix: "realstock.v51_4_4.cache." };
+export const STORAGE_KEYS = { session: "realstock.v51_4_5.session", draft: "realstock.v51_4_5.draft", cachePrefix: "realstock.v51_4_5.cache." };
 export const ISSUE_DESTINATIONS = [
   { key: "front", label: "หน้าร้าน" },
   { key: "kitchen", label: "ครัว" },
