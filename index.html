@@ -129,12 +129,14 @@
           <div>
             <strong>Admin Tools</strong>
             <div class="hint">ซ่อนจากหน้าใช้งานปกติ เปิดได้เฉพาะ ?admin=1</div>
+            <div id="diagText" class="hint" style="margin-top:6px"></div>
             <div id="runtimePanel" class="hint" style="margin-top:6px"></div>
             <div id="diagPanel" class="hint" style="margin-top:6px"></div>
           </div>
           <div class="row">
             <button id="warmBtn" class="btn">Warm cache</button>
-            <button id="rebuildBtn" class="btn">Rebuild views</button>
+            <button id="nightlyBtn" class="btn">Run nightly</button>
+            <button id="preflightBtn" class="btn">Preflight</button>
             <button id="refreshDiagBtn" class="btn">Refresh diagnostics</button>
           </div>
         </div>
@@ -149,6 +151,8 @@
           <div id="cacheStamp" class="hint"></div>
         </div>
       </div>
+
+      <div id="infoBanner" class="card pad" style="margin-bottom:12px"><strong>ระบบคำนวณรอบ 22:00 • Count/Issue/Receive รับค่าก่อน ไม่คำนวณเรียลไทม์</strong></div>
 
       <div id="destinationPanel" class="card pad hidden" style="margin-bottom:12px">
         <div><strong>ปลายทางการเบิก</strong></div>

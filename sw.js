@@ -1,36 +1,5 @@
-const CACHE_NAME = "realstock-v50-lts-static-v1";
-const ASSETS = [
-  "./",
-  "./index.html",
-  "./manifest.json",
-  "./src/config.v50.js",
-  "./src/utils.v50.js",
-  "./src/store.v50.js",
-  "./src/state.v50.js",
-  "./src/auth.v50.js",
-  "./src/api.v50.js",
-  "./src/catalog.v50.js",
-  "./src/inventory.v50.js",
-  "./src/ui.v50.js",
-  "./src/app.v50.js"
-];
-self.addEventListener("install", (event) => {
-  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS)).then(() => self.skipWaiting()));
-});
-self.addEventListener("activate", (event) => {
-  event.waitUntil(caches.keys().then((keys) => Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))).then(() => self.clients.claim()));
-});
-self.addEventListener("fetch", (event) => {
-  const req = event.request;
-  if (req.method !== "GET") return;
-  const url = new URL(req.url);
-  if (url.origin !== location.origin) return;
-  if (url.pathname.endsWith('.js') || url.pathname.endsWith('.css') || url.pathname.endsWith('.html') || url.pathname.endsWith('.json')) {
-    event.respondWith(caches.match(req).then((hit) => hit || fetch(req).then((res) => {
-      const copy = res.clone();
-      caches.open(CACHE_NAME).then((cache) => cache.put(req, copy));
-      return res;
-    }).catch(() => caches.match('./index.html'))));
-    return;
-  }
-});
+const CACHE_NAME = "realstock-v51-nightly-static-v1";
+const ASSETS = ["./","./index.html","./manifest.json","./src/config.v51.js","./src/utils.v51.js","./src/store.v51.js","./src/state.v51.js","./src/auth.v51.js","./src/api.v51.js","./src/catalog.v51.js","./src/inventory.v51.js","./src/ui.v51.js","./src/app.v51.js"];
+self.addEventListener("install", (event) => { event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS)).then(() => self.skipWaiting())); });
+self.addEventListener("activate", (event) => { event.waitUntil(caches.keys().then((keys) => Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))).then(() => self.clients.claim())); });
+self.addEventListener("fetch", (event) => { const req = event.request; if (req.method !== "GET") return; const url = new URL(req.url); if (url.origin !== location.origin) return; if (url.pathname.endsWith('.js') || url.pathname.endsWith('.css') || url.pathname.endsWith('.html') || url.pathname.endsWith('.json')) { event.respondWith(caches.match(req).then((hit) => hit || fetch(req).then((res) => { const copy = res.clone(); caches.open(CACHE_NAME).then((cache) => cache.put(req, copy)); return res; }).catch(() => caches.match('./index.html')))); } });
