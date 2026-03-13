@@ -1,8 +1,8 @@
 (function () {
   if (!('serviceWorker' in navigator)) return;
 
-  const SW_URL = './sw.js?v=51.4.6';
-  const APP_MARKER = 'realstock-v51-4-6';
+  const SW_URL = './sw.js?v=51.4.7';
+  const APP_MARKER = 'realstock-v51-4-7';
   let deferredPrompt = null;
 
   function qs(id) {

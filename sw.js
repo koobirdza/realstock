@@ -1,24 +1,24 @@
-const CACHE_VERSION = 'realstock-v51-4-6';
+const CACHE_VERSION = 'realstock-v51-4-7';
 const APP_SHELL = [
   './',
-  './index.html?v=51.4.6',
-  './manifest.json?v=51.4.6',
-  './pwa-register.js?v=51.4.6',
-  './icons/favicon-32.png?v=51.4.6',
-  './icons/icon-192.png?v=51.4.6',
-  './icons/icon-512.png?v=51.4.6',
-  './icons/icon-512-maskable.png?v=51.4.6',
-  './icons/apple-touch-icon.png?v=51.4.6',
-  './src/app.v51.js?v=51.4.6',
-  './src/api.v51.js?v=51.4.6',
-  './src/auth.v51.js?v=51.4.6',
-  './src/catalog.v51.js?v=51.4.6',
-  './src/config.v51.js?v=51.4.6',
-  './src/inventory.v51.js?v=51.4.6',
-  './src/state.v51.js?v=51.4.6',
-  './src/store.v51.js?v=51.4.6',
-  './src/ui.v51.js?v=51.4.6',
-  './src/utils.v51.js?v=51.4.6'
+  './index.html?v=51.4.7',
+  './manifest.json?v=51.4.7',
+  './pwa-register.js?v=51.4.7',
+  './icons/favicon-32.png?v=51.4.7',
+  './icons/icon-192.png?v=51.4.7',
+  './icons/icon-512.png?v=51.4.7',
+  './icons/icon-512-maskable.png?v=51.4.7',
+  './icons/apple-touch-icon.png?v=51.4.7',
+  './src/app.v51.js?v=51.4.7',
+  './src/api.v51.js?v=51.4.7',
+  './src/auth.v51.js?v=51.4.7',
+  './src/catalog.v51.js?v=51.4.7',
+  './src/config.v51.js?v=51.4.7',
+  './src/inventory.v51.js?v=51.4.7',
+  './src/state.v51.js?v=51.4.7',
+  './src/store.v51.js?v=51.4.7',
+  './src/ui.v51.js?v=51.4.7',
+  './src/utils.v51.js?v=51.4.7'
 ];
 
 self.addEventListener('install', (event) => {
