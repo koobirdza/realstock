@@ -1,24 +1,24 @@
-const CACHE_VERSION = 'realstock-v51-4-4';
+const CACHE_VERSION = 'realstock-v51-4-5';
 const APP_SHELL = [
   './',
-  './index.html',
-  './manifest.json',
-  './pwa-register.js',
-  './icons/favicon-32.png',
-  './icons/icon-192.png',
-  './icons/icon-512.png',
-  './icons/icon-512-maskable.png',
-  './icons/apple-touch-icon.png',
-  './src/app.v51.js',
-  './src/api.v51.js',
-  './src/auth.v51.js',
-  './src/catalog.v51.js',
-  './src/config.v51.js',
-  './src/inventory.v51.js',
-  './src/state.v51.js',
-  './src/store.v51.js',
-  './src/ui.v51.js',
-  './src/utils.v51.js'
+  './index.html?v=51.4.5',
+  './manifest.json?v=51.4.5',
+  './pwa-register.js?v=51.4.5',
+  './icons/favicon-32.png?v=51.4.5',
+  './icons/icon-192.png?v=51.4.5',
+  './icons/icon-512.png?v=51.4.5',
+  './icons/icon-512-maskable.png?v=51.4.5',
+  './icons/apple-touch-icon.png?v=51.4.5',
+  './src/app.v51.js?v=51.4.5',
+  './src/api.v51.js?v=51.4.5',
+  './src/auth.v51.js?v=51.4.5',
+  './src/catalog.v51.js?v=51.4.5',
+  './src/config.v51.js?v=51.4.5',
+  './src/inventory.v51.js?v=51.4.5',
+  './src/state.v51.js?v=51.4.5',
+  './src/store.v51.js?v=51.4.5',
+  './src/ui.v51.js?v=51.4.5',
+  './src/utils.v51.js?v=51.4.5'
 ];
 
 self.addEventListener('install', (event) => {
@@ -42,8 +42,23 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
   if (url.origin !== self.location.origin) return;
 
+  const isDocument = event.request.mode === 'navigate' || event.request.destination === 'document';
+  const isDynamicShell = ['script', 'style', 'manifest'].includes(event.request.destination) || url.pathname.endsWith('/manifest.json') || url.pathname.endsWith('/pwa-register.js') || url.pathname.endsWith('/index.html');
+
   event.respondWith((async () => {
     const cache = await caches.open(CACHE_VERSION);
+
+    if (isDocument || isDynamicShell) {
+      try {
+        const fresh = await fetch(event.request, { cache: 'no-store' });
+        if (fresh && fresh.status === 200) cache.put(event.request, fresh.clone()).catch(() => {});
+        return fresh;
+      } catch (err) {
+        const fallback = await cache.match(event.request, { ignoreSearch: true });
+        return fallback || Response.error();
+      }
+    }
+
     const cached = await cache.match(event.request, { ignoreSearch: true });
     if (cached) return cached;
 
