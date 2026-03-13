@@ -4,21 +4,16 @@ import { $, $$, escapeHtml } from "./utils.v51.js";
 import { getItems, pathLabels, needsDestination } from "./catalog.v51.js";
 const dom = {};
 export function bindDom() {
-  ["loginPage","appPage","employeeName","loginBtn","logoutBtn","employeeDisplay","modeBadge","healthBadge","versionLabel","homeBtn","backBtn","breadcrumb","nodePanel","itemPanel","destinationPanel","destinationButtons","toast","errorBox","cacheStamp","adminPanel","warmBtn","nightlyBtn","preflightBtn","diagText","infoBanner","syncBadge"].forEach((id) => dom[id] = $(id));
+  ["loginPage","appPage","employeeName","loginBtn","logoutBtn","employeeDisplay","modeBadge","healthBadge","versionLabel","homeBtn","backBtn","breadcrumb","nodePanel","itemPanel","destinationPanel","destinationButtons","toast","errorBox","cacheStamp","adminPanel","warmBtn","nightlyBtn","preflightBtn","diagText","infoBanner"].forEach((id) => dom[id] = $(id));
   dom.versionLabel.textContent = APP_VERSION;
   return dom;
 }
 export function showError(message = "") { dom.errorBox.textContent = message; dom.errorBox.classList.toggle("hidden", !message); }
 export function setHealth(ok, text) { dom.healthBadge.textContent = text; dom.healthBadge.style.background = ok ? "#dcfce7" : "#fee2e2"; dom.healthBadge.style.color = ok ? "#166534" : "#991b1b"; }
-export function setSyncState(stateKey = "idle", label = "พร้อม") {
-  if (!dom.syncBadge) return;
-  dom.syncBadge.dataset.sync = stateKey;
-  dom.syncBadge.textContent = label;
-}
 export function toast(message, type = "info", ms = 1800) { dom.toast.className = `toast ${type}`; dom.toast.textContent = message; dom.toast.classList.remove("hidden"); clearTimeout(dom.toast._t); dom.toast._t = setTimeout(() => dom.toast.classList.add("hidden"), ms); }
 export function renderSession() { dom.loginPage.classList.toggle("hidden", !!state.employee); dom.appPage.classList.toggle("hidden", !state.employee); dom.employeeDisplay.textContent = state.employee || "-"; dom.homeBtn.classList.toggle("hidden", !state.mode); dom.backBtn.classList.toggle("hidden", !state.mode || !state.path.length); const meta = MODE_META[state.mode]; dom.modeBadge.textContent = meta?.label || "ยังไม่ได้เลือกโหมด"; dom.modeBadge.dataset.modeColor = meta?.color || ""; document.body.dataset.mode = state.mode || ""; }
 export function renderAdmin() { dom.adminPanel.classList.toggle("hidden", !state.admin); if (state.admin && dom.diagText) dom.diagText.innerHTML = escapeHtml(state.infoBanner || ''); }
-export function renderInfoBanner() { if (!dom.infoBanner) return; const meta = MODE_META[state.mode] || {}; const helper = meta.helper || 'Count/Issue/Receive = append log only • ใช้ Make แยกแจ้งเตือนเพื่อให้เว็บยังลื่น'; dom.infoBanner.innerHTML = `<strong>${escapeHtml(helper)}</strong>`; }
+export function renderInfoBanner() { if (!dom.infoBanner) return; const meta = MODE_META[state.mode] || {}; const helper = meta.helper || 'Count/Issue/Receive = append log only • Order = nightly report'; dom.infoBanner.innerHTML = `<strong>${escapeHtml(helper)}</strong>`; }
 export function renderBreadcrumb(tree) { const crumbs = pathLabels(tree, state.path); dom.breadcrumb.innerHTML = crumbs.map((c, idx) => `${idx ? '<span class="crumb-sep">›</span>' : ''}<span class="crumb"><span class="crumb-icon">${c.icon || '📁'}</span><span>${escapeHtml(c.label)}</span></span>`).join(''); dom.cacheStamp.innerHTML = escapeHtml(state.lastCacheStamp || 'snapshot ล่าสุดจากรอบ 22:00'); }
 export function renderDestinationPicker() { const visible = needsDestination(state.mode); dom.destinationPanel.classList.toggle("hidden", !visible); if (!visible) return; dom.destinationButtons.innerHTML = ISSUE_DESTINATIONS.map((d) => `<button class="btn" data-dest="${escapeHtml(d.key)}" ${state.destination === d.key ? 'data-selected="1"' : ''}>${escapeHtml(d.label)}</button>`).join(''); }
 export function renderNodesFromHtml(html, onOpen) { dom.itemPanel.classList.add("hidden"); dom.nodePanel.classList.remove("hidden"); dom.nodePanel.innerHTML = html || '<div class="card pad">ไม่พบหมวด</div>'; $$('[data-node]', dom.nodePanel).forEach((el) => el.addEventListener('click', () => onOpen(el.dataset.node))); }
@@ -34,49 +29,8 @@ export function renderItems(node, stockMap = {}, orderRows = [], onSave) {
   const orderMap = Object.fromEntries(orderRows.map((x) => [x.item_key, x]));
   if (state.mode === 'order') items = items.filter((item) => Number(orderMap[item.item_key]?.suggested_order_qty || 0) > 0);
   if (!items.length) { dom.itemPanel.innerHTML = `<div class="card pad">${state.mode === 'order' ? 'รอบนี้ไม่มีรายการที่ต้องสั่ง' : 'ไม่พบรายการในหมวดนี้'}</div>`; return; }
-
-  const chunkSize = state.mode === 'order' ? 60 : 40;
-  const headerHtml = `<div class="card pad"><div class="between" style="margin-bottom:12px"><div><strong>${escapeHtml(meta.label)}</strong><div class="hint">${escapeHtml(meta.helper)}</div></div><div class="pill">${items.length} รายการ</div></div><div id="itemGrid" class="grid"></div>${state.mode === 'order' ? '' : `<div class="footer-bar"><div class="row"><button id="saveBtn" class="btn primary">${escapeHtml(meta.saveLabel)}</button><button id="clearBtn" class="btn">ล้างค่า</button><button id="restoreBtn" class="btn">กู้ข้อมูลค้าง</button></div></div>`}</div>`;
-  dom.itemPanel.innerHTML = headerHtml;
-  const gridEl = $("#itemGrid");
-  let cursor = 0;
-
-  function cardHtml(item, idx) {
-    const stock = stockMap[item.item_key] || {};
-    const order = orderMap[item.item_key] || {};
-    const suggestion = Number(order.suggested_order_qty || 0);
-    if (state.mode === 'order') {
-      return `<div class="item"><div class="between" style="margin-bottom:6px;align-items:flex-start"><h4>${idx + 1}. ${escapeHtml(item.item_name)}</h4><span class="mini-badge">${escapeHtml(item.unit || '')}</span></div>${itemMetaHtml(state.mode, item, stock, order)}<div class="between" style="margin-top:12px"><div><div class="hint">จำนวนที่ควรสั่ง</div><div style="font-size:34px;font-weight:800;line-height:1.1">${escapeHtml(suggestion)}</div></div><div class="pill">ใช้ Receive ตอนของมาถึง</div></div></div>`;
-    }
-    return `<div class="item"><div class="between" style="margin-bottom:6px;align-items:flex-start"><h4>${idx + 1}. ${escapeHtml(item.item_name)}</h4><span class="mini-badge">${escapeHtml(item.unit || '')}</span></div>${itemMetaHtml(state.mode, item, stock, order)}<div class="qty-row"><input class="input qty" data-qty-index="${idx}" inputmode="decimal" type="number" min="0" step="any" placeholder="จำนวน" /><button class="btn step" data-step="${idx}:1">+1</button></div></div>`;
-  }
-
-  function bindChunkEvents(root = dom.itemPanel) {
-    $$('[data-step]', root).forEach((el) => {
-      if (el.dataset.bound === '1') return;
-      el.dataset.bound = '1';
-      el.addEventListener('click', () => {
-        const [idx, step] = el.dataset.step.split(':').map(Number);
-        const input = dom.itemPanel.querySelector(`[data-qty-index="${idx}"]`);
-        if (!input) return;
-        input.value = String(Number(input.value || 0) + step);
-        input.dispatchEvent(new Event('input'));
-      });
-    });
-  }
-
-  function renderNextChunk() {
-    const slice = items.slice(cursor, cursor + chunkSize);
-    if (!slice.length) return;
-    const html = slice.map((item, idx) => cardHtml(item, cursor + idx)).join('');
-    gridEl.insertAdjacentHTML('beforeend', html);
-    cursor += slice.length;
-    bindChunkEvents(gridEl);
-    if (cursor < items.length) requestAnimationFrame(renderNextChunk);
-  }
-
-  requestAnimationFrame(renderNextChunk);
+  dom.itemPanel.innerHTML = `<div class="card pad"><div class="between" style="margin-bottom:12px"><div><strong>${escapeHtml(meta.label)}</strong><div class="hint">${escapeHtml(meta.helper)}</div></div><div class="pill">${items.length} รายการ</div></div><div class="grid">${items.map((item, idx) => { const stock = stockMap[item.item_key] || {}; const order = orderMap[item.item_key] || {}; const suggestion = Number(order.suggested_order_qty || 0); if (state.mode === 'order') { return `<div class="item"><div class="between" style="margin-bottom:6px;align-items:flex-start"><h4>${idx + 1}. ${escapeHtml(item.item_name)}</h4><span class="mini-badge">${escapeHtml(item.unit || '')}</span></div>${itemMetaHtml(state.mode, item, stock, order)}<div class="between" style="margin-top:12px"><div><div class="hint">จำนวนที่ควรสั่ง</div><div style="font-size:34px;font-weight:800;line-height:1.1">${escapeHtml(suggestion)}</div></div><div class="pill">ใช้ Receive ตอนของมาถึง</div></div></div>`; } return `<div class="item"><div class="between" style="margin-bottom:6px;align-items:flex-start"><h4>${idx + 1}. ${escapeHtml(item.item_name)}</h4><span class="mini-badge">${escapeHtml(item.unit || '')}</span></div>${itemMetaHtml(state.mode, item, stock, order)}<div class="qty-row"><input class="input qty" data-qty-index="${idx}" inputmode="decimal" type="number" min="0" step="any" placeholder="จำนวน" /><button class="btn step" data-step="${idx}:1">+1</button></div></div>`; }).join('')}</div>${state.mode === 'order' ? '' : `<div class="footer-bar"><div class="row"><button id="saveBtn" class="btn primary">${escapeHtml(meta.saveLabel)}</button><button id="clearBtn" class="btn">ล้างค่า</button><button id="restoreBtn" class="btn">กู้ข้อมูลค้าง</button></div></div>`}</div>`;
+  $$('[data-step]', dom.itemPanel).forEach((el) => el.addEventListener('click', () => { const [idx, step] = el.dataset.step.split(':').map(Number); const input = dom.itemPanel.querySelector(`[data-qty-index="${idx}"]`); input.value = String(Number(input.value || 0) + step); input.dispatchEvent(new Event('input')); }));
   if (state.mode !== 'order') $("saveBtn").addEventListener("click", onSave);
 }
-
 export function renderSkeleton() { dom.nodePanel.classList.remove("hidden"); dom.itemPanel.classList.add("hidden"); dom.nodePanel.innerHTML = '<div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>'; }

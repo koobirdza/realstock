@@ -94,7 +94,7 @@ export function buildTree(rows = []) {
 
     const target = pickTargetLabel(row);
     const sub = pickSubLabel(row);
-    const schedule = normalizeSchedule(row.schedule_group || row.main_category_label || row.main_category);
+    const schedule = normalizeSchedule(row.schedule_group || '');
 
     root.children[target] ||= nodeTemplate(target, target, "target", targetIcon(target), schedule);
     root.children[target].children[sub] ||= nodeTemplate(sub, sub, "sub", subIcon(sub), schedule);
