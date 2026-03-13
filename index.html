@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>RealStock v51.4 Make Ready</title>
+  <title>RealStock v51.4.2 Data Fix + Cache Fix</title>
   <meta name="theme-color" content="#0f172a" />
   <link rel="manifest" href="./manifest.json" />
   <style>
     :root{--bg:#f4f7fb;--panel:#fff;--ink:#0f172a;--muted:#64748b;--line:#dbe4f0;--shadow:0 12px 30px rgba(15,23,42,.08);--count:#16a34a;--issue:#2563eb;--receive:#d97706;--order:#7c3aed;--danger:#dc2626;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
     *{box-sizing:border-box} html,body{margin:0;background:var(--bg);color:var(--ink);transition:background .2s ease}
-    body[data-mode="count"]{background:#bbf7d0} body[data-mode="issue"]{background:#bfdbfe} body[data-mode="receive"]{background:#fed7aa} body[data-mode="order"]{background:#ddd6fe}
+    body[data-mode="count"]{background:#dcfce7} body[data-mode="issue"]{background:#dbeafe} body[data-mode="receive"]{background:#ffedd5} body[data-mode="order"]{background:#ede9fe}
     button,input,select{font:inherit}.app{max-width:1100px;margin:0 auto;padding:16px}.header{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:16px}.title{font-size:28px;font-weight:800;margin:0}.sub{color:var(--muted);font-size:14px;margin-top:4px}.card{background:var(--panel);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow)}.pad{padding:16px}.grid{display:grid;gap:12px}.modes{grid-template-columns:repeat(4,minmax(0,1fr))}.mode{border:none;color:#fff;padding:18px;border-radius:20px;text-align:left;cursor:pointer;box-shadow:var(--shadow);font-weight:700}.mode small{display:block;opacity:.92;font-weight:500;margin-top:4px}.mode.count{background:linear-gradient(135deg,#15803d,#22c55e)}.mode.issue{background:linear-gradient(135deg,#1d4ed8,#60a5fa)}.mode.receive{background:linear-gradient(135deg,#b45309,#f59e0b)}.mode.order{background:linear-gradient(135deg,#6d28d9,#a78bfa)}.badge{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:6px 12px;font-size:13px;background:#e2e8f0}#syncBadge[data-sync="saving"]{background:#dbeafe;color:#1d4ed8}#syncBadge[data-sync="synced"]{background:#dcfce7;color:#166534}#syncBadge[data-sync="error"]{background:#fee2e2;color:#991b1b}.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}.between{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}.btn{border:1px solid var(--line);background:#fff;border-radius:14px;padding:10px 14px;cursor:pointer;font-weight:700}.btn.primary{background:#0f172a;color:#fff;border-color:#0f172a}.btn.ghost{background:#f8fafc}.btn:disabled{opacity:.55;cursor:not-allowed}.login{max-width:420px;margin:32px auto}.input{width:100%;border:1px solid var(--line);background:#fff;border-radius:14px;padding:12px 14px}.nav-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.nav-btn{padding:16px;border:1px solid var(--line);background:#fff;border-radius:18px;text-align:left;cursor:pointer}.item{padding:14px;border:1px solid var(--line);border-radius:18px;background:#fff}.item h4{margin:0 0 6px;font-size:16px}.meta{color:var(--muted);font-size:13px}.qty-row{display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap}.qty{max-width:150px}.step{min-width:48px;padding:10px 12px}.footer-bar{position:sticky;bottom:0;background:rgba(244,247,251,.95);backdrop-filter:blur(6px);padding-top:10px}.hidden{display:none!important}.toast{position:fixed;top:16px;right:16px;z-index:9999;min-width:220px;max-width:360px;color:#fff;border-radius:16px;padding:14px 16px;box-shadow:0 18px 35px rgba(15,23,42,.18)}.toast.info{background:#334155}.toast.success{background:#166534}.toast.error{background:#b91c1c}.error{background:#fef2f2;border:1px solid #fecaca;color:#991b1b;border-radius:16px;padding:12px 14px}.hint{color:var(--muted);font-size:13px}.pill{display:inline-block;padding:4px 10px;border-radius:999px;background:#eff6ff;color:#1d4ed8;font-size:12px;font-weight:700}.skeleton{height:86px;border-radius:18px;background:linear-gradient(90deg,#e2e8f0 25%,#f8fafc 37%,#e2e8f0 63%);background-size:400% 100%;animation:shine 1.2s infinite}.nav-card{display:flex;flex-direction:column;gap:8px;min-height:110px}.nav-top{display:flex;justify-content:space-between;align-items:center;gap:8px}.nav-title{font-weight:800;font-size:16px}.nav-icon{font-size:24px;line-height:1}.mini-badge{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:4px 8px;background:#f1f5f9;color:#334155;font-size:12px;font-weight:700}.crumb{display:inline-flex;align-items:center;gap:6px;font-weight:700}.crumb-icon{font-size:18px;line-height:1}.crumb-sep{display:inline-block;margin:0 8px;color:#94a3b8}[data-selected="1"]{background:#dbeafe;border-color:#60a5fa}#modeBadge[data-mode-color="count"]{background:#dcfce7;color:#166534}#modeBadge[data-mode-color="issue"]{background:#dbeafe;color:#1d4ed8}#modeBadge[data-mode-color="receive"]{background:#ffedd5;color:#b45309}#modeBadge[data-mode-color="order"]{background:#ede9fe;color:#6d28d9}@keyframes shine{0%{background-position:100% 0}100%{background-position:0 0}}@media(max-width:880px){.modes,.nav-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:640px){.modes,.nav-grid{grid-template-columns:1fr}.title{font-size:24px}}
   </style>
 </head>
@@ -17,8 +17,8 @@
   <div class="app">
     <div class="header">
       <div>
-        <h1 class="title">🍲 RealStock v51.4 Make Ready</h1>
-        <div class="sub">GitHub Pages + Google Apps Script + Google Sheets • stock-zone catalog + nightly snapshot at 22:00 + make-ready event IDs</div>
+        <h1 class="title">🍲 RealStock v51.4.2 Data Fix + Cache Fix</h1>
+        <div class="sub">GitHub Pages + Google Apps Script + Google Sheets • stock-zone catalog + data fix + cache fix + make-ready logs</div>
       </div>
       <div class="row">
         <span id="versionLabel" class="badge"></span>
@@ -56,7 +56,7 @@
 
       <div class="grid modes" style="margin-bottom:12px">
         <button class="mode count" data-mode="count">🟢 นับสต๊อก<small>รวม ห้องสต๊อก + สต๊อกบาร์น้ำ + จุดนับอื่น</small></button>
-        <button class="mode issue" data-mode="issue">🔵 เบิกของ<small>รวมหมวด ห้องสต๊อก + สต๊อกบาร์น้ำ</small></button>
+        <button class="mode issue" data-mode="issue">🔵 เบิกของ<small>รวมหมวด ห้องสต๊อก + สต๊อกบาร์น้ำ + สต๊อกของสด/ผัก</small></button>
         <button class="mode receive" data-mode="receive">🟠 รับของ<small>รับเข้าสต๊อกโดยตรง: ห้องสต๊อก / สต๊อกบาร์น้ำ / ของสด</small></button>
         <button class="mode order" data-mode="order">🟣 ควรสั่งอะไรบ้าง<small>รายงานจำนวนที่ควรสั่ง • ไม่ต้องกรอก</small></button>
       </div>
@@ -86,7 +86,7 @@
         </div>
       </div>
 
-      <div id="infoBanner" class="card pad" style="margin-bottom:12px"><strong>Count/Issue/Receive = append log only • แจ้งเตือนแยกผ่าน Make โดยไม่ทำให้ Save ช้า</strong></div>
+      <div id="infoBanner" class="card pad" style="margin-bottom:12px"><strong>Count/Issue/Receive = append log only • Make ใช้ event_id / request_id จาก log ได้เลย</strong></div>
 
       <div id="destinationPanel" class="card pad hidden" style="margin-bottom:12px">
         <div><strong>ปลายทางการเบิก</strong></div>
